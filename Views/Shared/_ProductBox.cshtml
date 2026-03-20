@@ -1,0 +1,310 @@
+﻿@model ProductOverviewModel
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+@using Nop.Services.Security
+@inject CatalogSettings catalogSettings
+@inject IPermissionService permissionService
+@inject IStoreContext storeContext
+@{
+    //prepare "Add to cart" AJAX link
+    
+    var quantity = 1;
+    
+    var addtowishlistlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = (int)ShoppingCartType.Wishlist, quantity = quantity });
+    var addtocomparelink = Url.RouteUrl("AddProductToCompare", new { productId = Model.Id });
+
+    var productDetailsUrl = Url.RouteUrl("Product", new { SeName = Model.SeName });
+
+    var currentStore = await storeContext.GetCurrentStoreAsync();
+    var userHasAccessToSeePrices = await permissionService.AuthorizeAsync(StandardPermissionProvider.DisplayPrices) || currentStore.Id == 8;
+    
+
+}
+<div class="product-item card product-card card-static" data-productid="@Model.Id">
+    <div class="gallery">
+        <!-- Esto son los Colores -->
+        <div class="color-overlay">
+    <div class="variant-carousel-wrapper">
+        <button class="carousel-arrow left" onclick="scrollVariants(this, 'left')">❮</button>
+        @await Component.InvokeAsync("Widget", new { widgetZone = "productbox_details_before", additionalData = Model })
+        <button class="carousel-arrow right" onclick="scrollVariants(this, 'right')">❯</button>
+    </div>
+</div>
+
+        <div class="actions">
+            @if (!Model.ProductPrice.DisableWishlistButton)
+            {
+                <button type="button"
+                        class="button-2 add-to-wishlist-button btn-wishlist btn-sm"
+                        title="@T("ShoppingCart.AddToWishlist")"
+                        onclick="AjaxCart.addproducttocart_catalog('@addtowishlistlink');return false;"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="left">
+                    <i class="bi bi-heart"></i>
+                </button>
+            }
+        </div>
+        <a 
+            href="@productDetailsUrl" 
+            title="@Model.DefaultPictureModel.Title" 
+            class="card-img-top d-block overflow-hidden">
+                <img id="@string.Concat("img_p", Model.Id.ToString())"
+                    loading="lazy"
+                    alt="@Model.DefaultPictureModel.AlternateText" 
+                    src="@Model.DefaultPictureModel.ImageUrl" 
+                    title="@Model.DefaultPictureModel.Title"/>
+        </a>
+    </div>
+    
+    <!-- Este div es lo de debajo de las imágenes -->
+    
+    <div class="details">
+        <div class="card-body card-body--data">
+        
+            @if (catalogSettings.ShowSkuOnCatalogPages && !string.IsNullOrEmpty(Model.Sku))
+                {
+                <div class="icons2">
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "productbox_picture_before", additionalData = Model })
+                </div>
+
+                <div class="product-title-inline">
+                    <a class="product-meta fs-xs me-1" href="@productDetailsUrl">@Model.Sku</a>
+                    <span class="product-separator me-1">|</span>
+                    <h3 class="product-title fs-xs mb-0 text-dark">
+                        <a href="@productDetailsUrl">@Model.Name</a>
+                    </h3>
+                </div>
+                }
+            else
+{
+    <h3 class="product-title fs-xs mb-1 text-dark">
+        <a href="@productDetailsUrl">@Model.Name</a>
+    </h3>
+}
+        
+            @if (Model.ReviewOverviewModel.AllowCustomerReviews)
+            {
+                var ratingPercent = 0;
+                if (Model.ReviewOverviewModel.TotalReviews != 0)
+                {
+                    ratingPercent = ((Model.ReviewOverviewModel.RatingSum*100)/Model.ReviewOverviewModel.TotalReviews)/5;
+                }
+                <div class="product-rating-box" title="@string.Format(T("Reviews.TotalReviews").Text, Model.ReviewOverviewModel.TotalReviews)">
+                    <div class="rating">
+                        <div style="width: @(ratingPercent)%">
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="add-info mb-2">
+                @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ProductBoxAddinfoBefore, additionalData = Model })
+                @if(userHasAccessToSeePrices)
+                {
+                    <div class="prices mb-1">
+                        @if (!string.IsNullOrEmpty(Model.ProductPrice.OldPrice))
+                        {
+                            <a href="@productDetailsUrl" class="price old-price text-decoration-line-through">@Model.ProductPrice.OldPrice</a>
+                        }
+<!-- Precio + Sku -->
+                        <div class="product-title-inline">
+                        <!-- Precio actual -->
+                        <a href="@productDetailsUrl" class="price actual-price text-accent">
+                            <span class="fs-xs">@T("goya.theme.productbox.pricefrom.text")</span> 
+                            @Model.ProductPrice.Price
+                        </a>
+                            <div class="sku stock-info-js">
+                                <!--Stock -->
+                                @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ProductBoxAddinfoMiddle, additionalData = Model }) 
+                            </div>
+                        </div>
+<!-- Fin Precio + Sku -->
+                    </div>
+                }
+            </div> 
+        </div>
+        @if (!Model.ProductPrice.DisableBuyButton)
+{
+    <div class="card-body card-body--actions">
+        
+        <a href="@productDetailsUrl"
+            class="btn btn-outline-secondary btn-sm product-card__add-to-cart-button open-product-modal"
+            data-url="@productDetailsUrl"
+            title="@Model.Name">
+            <i class="bi bi-cart3"></i>
+        </a>
+
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ProductBoxAddinfoAfter, additionalData = Model })
+    
+    </div>
+}
+
+    </div>
+    
+</div>
+<!-- Remove -->
+@*<div class="description">
+    @Html.Raw(Model.ShortDescription)
+</div>
+var addtocartlink = "";
+    var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
+    if (Model.ProductPrice.ForceRedirectionAfterAddingToCart)
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity, forceredirection = Model.ProductPrice.ForceRedirectionAfterAddingToCart });
+    }
+    else
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity });
+    }
+<button type="button" class="btn btn-outline-secondary btn-sm product-card__add-to-cart-button" onclick="AjaxCart.addproducttocart_catalog('@addtocartlink');return false;"><i class="bi bi-cart3"></i></button>
+@if (!Model.ProductPrice.DisableAddToCompareListButton)
+{
+    <button type="button" class="button-2 add-to-compare-list-button" title="@T("ShoppingCart.AddToCompareList")" onclick="AjaxCart.addproducttocomparelist('@addtocomparelink');return false;">@T("ShoppingCart.AddToCompareList")</button>
+}
+if (Model.ProductPrice.IsRental)
+{
+    addToCartText = T("ShoppingCart.Rent").Text;
+}
+if (Model.ProductPrice.AvailableForPreOrder)
+{
+    addToCartText = T("ShoppingCart.PreOrder").Text;
+}
+@if (Model.ProductPrice.DisplayTaxShippingInfo)
+{
+    var inclTax = await workContext.GetTaxDisplayTypeAsync() == TaxDisplayType.IncludingTax;
+    //tax info is already included in the price (incl/excl tax). that's why we display only shipping info here
+    //of course, you can modify appropriate locales to include VAT info there
+    <span class="tax-shipping-info">
+        @T(inclTax ? "Products.Price.TaxShipping.InclTax" : "Products.Price.TaxShipping.ExclTax", Url.RouteUrl("Topic", new { SeName = await Html.GetTopicSeNameAsync("shippinginfo") }))
+    </span>
+}
+@if (!string.IsNullOrEmpty(Model.ProductPrice.BasePricePAngV))
+{
+    <div class="base-price-pangv">
+        @Model.ProductPrice.BasePricePAngV
+    </div>
+}
+*@
+
+<script src="~/js/arrows.js"></script>
+<script>
+function formatStock(container) {
+    const allText = container.innerText;
+
+    const stockMatch = allText.match(/Stock:\s*([\d,\.]+)/i);
+    if (!stockMatch) return;
+
+    let rawNumber = stockMatch[1].replace(/[.,]/g, '');
+    let stockNumber = parseInt(rawNumber, 10);
+    if (isNaN(stockNumber)) return;
+
+    if (stockNumber === 0) {
+    container.textContent = "Stock Prox.";
+        return;
+    }
+
+    let rounded;
+    let prefix;
+
+    if (stockNumber < 1000) {
+        rounded = stockNumber;
+        prefix = "";
+    } else {
+        rounded = Math.floor(stockNumber / 100) * 100;
+        prefix = "+";
+    }
+
+    const formatted = rounded.toLocaleString('es-ES');
+
+    container.querySelectorAll("*").forEach(el => {
+        if (el.children.length === 0 && el.textContent.match(/[\d,\.]+/)) {
+            el.textContent = prefix + formatted;
+        }
+    });
+}
+
+// Ejecutar al cargar
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".stock-info-js").forEach(formatStock);
+});
+
+// Observar solo el contenedor de productos
+const productsContainer = document.querySelector(".products-container");
+if (productsContainer) {
+    const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType !== 1) return;
+
+                if (node.classList?.contains("stock-info-js")) {
+                    formatStock(node);
+                } else {
+                    node.querySelectorAll?.(".stock-info-js").forEach(formatStock);
+                }
+            });
+        });
+    });
+
+    observer.observe(productsContainer, {
+        childList: true,
+        subtree: true
+    });
+}
+</script>
+
+
+<script>
+function initColorOverlays(context = document) {
+    context.querySelectorAll(".product-item").forEach(function (product) {
+        const overlay = product.querySelector(".color-overlay");
+        if (!overlay) return;
+
+        const colors = overlay.querySelectorAll(".variant-preview");
+
+        if (colors.length > 1) {
+            product.classList.add("has-multiple-colors");
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // 👇 ESTA LÍNEA ES CLAVE
+    initColorOverlays();
+
+    // Owl carousel (lo que ya tenías)
+    if (typeof $.fn.owlCarousel !== 'undefined') {
+        $('.owl-carousel').on('changed.owl.carousel', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+        });
+
+        var owl = $('.owl-carousel').data('owl.carousel');
+        if (owl && owl.settings) {
+            owl.settings.autoHeight = false;
+        }
+    }
+});
+
+const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+            if (node.nodeType !== 1) return;
+
+            if (
+                node.classList?.contains("product-item") ||
+                node.querySelector?.(".product-item")
+            ) {
+                initColorOverlays(node);
+            }
+        });
+    });
+});
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+</script>

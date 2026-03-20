@@ -1,0 +1,809 @@
+﻿@model SpecificationFilterModel
+
+@{
+    var cont = 0;
+
+    // ============================
+    // IDIOMA ACTIVO (NopCommerce 4.5)
+    // ============================
+    var currentLangId = (int)(ViewBag.CurrentLanguageId ?? 0);
+    // Ajusta estos IDs según los idiomas configurados en tu NopCommerce
+    // Admin → Configuración → Idiomas → columna ID
+    // Ejemplo: español=1, francés=2, inglés=3, portugués=4, catalán=5
+    var urlPath = Context.Request.Path.Value ?? "";
+var langCode =  urlPath.StartsWith("/fr/") ? "fr" :
+                urlPath.StartsWith("/en/") ? "en" :
+                urlPath.StartsWith("/pt/") ? "pt" :
+                urlPath.StartsWith("/ca/") ? "ca" : "es";
+
+    // ============================
+    // GRUPOS DE MATERIALES
+    // ============================
+    Dictionary<string, List<string>> materialGroups;
+    if (langCode == "fr")
+        materialGroups =         new Dictionary<string, List<string>>
+        {
+            { "38% Coton", new List<string> { "38% Cotton/ 40% Polyester/ 22% Rayonne" } },
+            { "40% Polyester 60% Coton", new List<string> { "40% Polyester 60% Coton" } },
+            { "ABS", new List<string> { "ABS / Aluminium", "ABS / Caoutchouc", "ABS / Clip Métallique", "ABS / Polyester", "ABS / Silicone", "Abs/Aluminium", "Abs/Carton", "Abs/métal" } },
+            { "Acier inoxydable", new List<string> { "Acier Inoxidable/Bois", "Acier Inoxydable / Bois", "Acier Inoxydable recyclé / PP", "Acier Inoxydable/Nylon 300D", "Acier Inoxydable/Plastique", "Acier Inoxydable/Satin", "Acier inoxidable / Gomme", "Acier inoxydable / Bambou", "Acier inoxydable / Bois", "Acier inoxydable / PP", "Acier inoxydable / PP / Silicone", "Acier inoxydable / PU / Carton", "Acier inoxydable 304 / PP / Silicone / Aluminium", "Acier inoxydable intérieur 304 / extérieur 201 / Bambou", "Acier inoxydable intérieur 304 / extérieur 201 / Couvercle en silicone et PP", "Acier inoxydable intérieur 304 / extérieur 201 / Silicone / PP", "Couverts: Acier inoxydable 304. Sac: 600D RPET", "Inox 304 intérieur / 201 Extérieur / PP" } },
+            { "Aluminium", new List<string> { "ABS / Aluminium", "Aluminium / ABS", "Aluminium / Bambou", "Aluminium Finition Caoutchouc", "Aluminium/Caoutchouc", "Aluminium/Liège", "Aluminium/Pu" } },
+            { "Bambou", new List<string> { "Bamboo / Silicone", "Bambou /  Acier inoxydable", "Bambou /  Métal", "Bambou / ABS", "Bambou / Acier", "Bambou / Acier inoxydable", "Bambou / Acrylique", "Bambou / Aluminium / ABS", "Bambou / Caoutchouc / Métal", "Bambou / Métal", "Bambou / Métal / ABS", "Bambou / PP", "Bambou / Plastique acrylique", "Bambou / Polyester", "Bambou / Silicone", "Bambou / Verre / Cuir Synthétique", "Bambou / Verre / Polypropylène", "Bambou / aluminium / ABS", "Bambou/ Polyester/ ABS/ Acrylique", "Bambou/Polyester", "Bambou/Silicone" } },
+            { "Bois", new List<string> { "Bois", "Bois  / Polyester", "Bois / Acier Inoxidable", "Bois / Acier inoxydable", "Bois / Carton", "Bois / Cire", "Bois / Coton", "Bois / Feutre", "Bois / Métal / Aimant", "Bois / Papier / Carton", "Bois / Plastique", "Bois / Polyester", "Bois avec vernis antibacterien", "Bois d'acacia nilotique", "Bois de Pin", "Bois de cerisier", "Bois de hêtre", "Bois de hêtre / Poil de nylon", "Bois de lotus", "Bois de merisier", "Bois de palissandre / Acier inoxydable", "Bois de peuplier", "Bois de pin", "Bois de pin / PE", "Bois naturel", "Bois/Acier Inoxydable", "Bois/Métal", "Bois/Pastel", "Bois/Polyester", "Carton / Bois / Plastique", "Du bois", "MDF", "Madera/Poliéster", "Mdf" } },
+            { "Borosilicate", new List<string> { "Borosilicate / Liège" } },
+            { "Caoutchouc", new List<string> { "Caoutchouc/Plastique", "Gomme / Plastique" } },
+            { "Carton", new List<string> { "Carton", "Carton / Aimant", "Carton / Bois", "Carton / Fibre de Blé / PP", "Carton / Fibre de blé et PP", "Carton / Liège", "Carton / Liège / PU", "Carton / Métal", "Carton / PU / Bambou", "Carton / PU / Métal", "Carton / Papier", "Carton / Papier de fruits / Papier", "Carton / Papier/ Métal", "Carton / RPET / Aluminium recyclé", "Carton de briques de lait / Papier", "Carton/Aimanté", "Carton/Chocolat", "Carton/Encens/Céramique", "Carton/Plâtre", "Carton/Pvc", "Carton/Verre", "Cartón / Acero inoxidable reciclado / PU / Aluminio reciclado", "Cartón / Cartón de leche / Aluminio reciclado", "Cartón / PU / Acero inoxidable / Acero inoxidable reciclado", "Cartón / PU / Acero inoxidable reciclado / Bambú / Poliéster / Abs / Acrílico", "Cartón / PU Reciclado / Aluminio reciclado", "Cartón / RPET / Bambú / Aluminio reciclado", "Papier carton", "Papier kraft / Papier de pierre" } },
+            { "Cire", new List<string> { "Cire" } },
+            { "Cire végétale", new List<string> { "Cire végétale / Fragrance / Verre" } },
+            { "Coton", new List<string> { "10% Polyester / 90% Coton", "100% Algodón", "100% Coton", "100% Cotton", "85% Coton / 15% Lurex", "90% coton / 10 % Polyester", "Algodón", "Bambou / Coton / Lin", "Canvas", "Canvas naturel", "Canvas naturel recyclé", "Canvas recyclé", "Caoutchouc / Coton", "Cordon en coton  / Métal", "Coton", "Coton / Aluminium", "Coton / Bois", "Coton / Coton recyclé", "Coton / Demin recyclé", "Coton / Jute", "Coton / Meltblown", "Coton / Métal", "Coton / PE", "Coton / Polyester", "Coton / Polyester / PU", "Coton / Spunbond", "Coton / Velours", "Coton /Demin recyclé", "Coton 100%", "Coton 70% / Seaqual 30%", "Coton 80% / Polyamide 16% / Élasthanne 4%", "Coton 80% / Polyamide 18% / Élasthanne 2%", "Coton 80% / Polyester 20%", "Coton Biologique", "Coton Fair Trade", "Coton Fair trade", "Coton Fairtrade", "Coton Fairtrade / Jute", "Coton Laminé", "Coton OEKO-TEX", "Coton Organique / Coton Recyclé", "Coton Recyclé", "Coton Recyclé / Jute", "Coton antibactérien", "Coton biologique", "Coton canvas recyclé", "Coton laminé / Jute laminé", "Coton laminée recyclée", "Coton organique", "Coton organique 100%", "Coton peigné", "Coton recyclage/ Polyester", "Coton recyclé", "Coton recyclé / Polyester", "Coton recyclé / Polyester recyclé", "Coton recyclé Fairtrade", "Coton toile laminée", "Coton équitable", "Coton/Métal", "Coton/Peigné", "Coton/Polyester", "Coton/Pvc", "Coton/Savon", "Cotton", "Cotton/Velouté", "Cubes : Marbre / Sac : Coton", "Denim recyclé", "Extérieur : 60 % coton, 40 % Polyester / Intérieur : coton", "Extérieur : Coton / Intérieur : Polyester", "Extérieur Coton recyclé / Intérieur non woven.", "Noir: Coton / Naturel: Coton Jute", "Papier / Coton", "Papier kraft / Coton", "Pareo: 80% Coton; 20% Polyester / Serviette: 100% Polyester", "Polyester 280D", "Toile recyclée", "Velours / Coton", "Velours côtelé", "coton 220 gr/m2 / Polyester" } },
+            { "Cristal", new List<string> { "Verre / Bambou", "Verre / Bambou / Cire Végétale / Paraffine raffinée 95% / Parfum 5%", "Verre / Bambou / Cire Végétale 80% / Paraffine 15% / Parfum 5%", "Verre / Bambou / Tiges de rotin", "Verre / Couvercle : Plastique recyclé", "Verre / PP / Aluminium", "Verre / Paraffine / Bois", "Verre / Paraffine / Cire Végétale", "Verre / Plastique / Fragrance", "Verre / Plastique / Huile", "Verre/Fragrance/DPM/Rattan" } },
+            { "Cuir", new List<string> { "Cuir", "Cuir Souple", "Cuir Vernis", "Cuir de vache", "Cuir recyclé", "Cuir recyclé / Papier", "Cuir/Metal" } },
+            { "Cuir synthétique", new List<string> { "Simili Cuir" } },
+            { "Cuir verni", new List<string> { "Cuir Vernis/Polyester" } },
+            { "Céramique", new List<string> { "Cerámica", "Craie", "Céramique", "Céramique / Liège", "Céramique/Bois", "Céramique/Paraffine", "Grès", "Terre cuite" } },
+            { "EVA", new List<string> { "Eva/Pvc" } },
+            { "Feutre", new List<string> { "Feutre / Non tissé" } },
+            { "Fibre de blé", new List<string> { "30% Fibre de blé et 70% PP", "Fibre de blé / PP (Biodégradable)", "Fibre de blé / PP / Liège", "Fibre de blé 60% / PP 40%", "Fibre de blé et PP" } },
+            { "Graines de blé", new List<string> { "Graines de blé / Lavande naturelle / Tissu en Coton" } },
+            { "Housse : Plastique", new List<string> { "Housse: Plastique, Stylo: Métal" } },
+            { "Liège", new List<string> { "Liège / ABS recyclé", "Liège / Bois / Silicone", "Liège / PU", "Liège / Papier", "Liège / papier", "Liège/Metal", "Liège/Pu" } },
+            { "Microfibre", new List<string> { "Microfibre / Sans PVC" } },
+            { "Mousse", new List<string> { "Mousse / Plastique", "Mousse/Plastique" } },
+            { "Métal", new List<string> { "Acier", "Acier Inoxidable", "Acier Inoxidable / Bambou", "Acier Inoxidable / Coton", "Acier Inoxidable 304 intérieur / Acier Inoxidable201 extérieur", "Acier Inoxydable", "Acier Inoxydable 304", "Acier Inoxydable 304 / Bambou", "Acier Inoxydable recyclé", "Acier Inoxydable recyclé 304", "Acier inoxidable", "Acier inoxidable 304", "Acier inoxidable recyclé", "Acier inoxydable", "Acier inoxydable 201 exterieur / 304 intérieur", "Acier inoxydable 304", "Acier inoxydable 304 intérieur /  201 extérieur", "Acier inoxydable 304 intérieur / 201 extérieur", "Acier inoxydable 304 intérieur /201 extérieur", "Acier inoxydable intérieur 304 / extérieur 201", "Alloy", "Aluminio reciclado", "Aluminium", "Aluminium Alloy", "Aluminium recyclé", "Aluminium recyclé / Bambou", "Aluminium recyclé / Bambou / Caoutchouc", "Aluminium recyclé / Caoutchouc", "Aluminium recyclé / Caoutchouc / Graphite", "Bambou / Métal / Aimant", "Fer", "Jade / Métal", "Laiton", "Liège / Métal", "METAL", "Metal", "Métal", "Métal / ABS", "Métal / Bois", "Métal / Caoutchouc", "Métal / Carton", "Métal / Coton", "Métal / PU", "Métal / PVC", "Métal / Paraffine", "Métal / Tissu", "Métal / Vaseline", "Métal/Bois", "Métal/Plastique", "Métal/Savon", "Nylon 170T / Métal", "PU / Métal", "PU / Métal / Carton", "Pongee 190T / Acier inoxidable / Fibre de verre", "Zinc", "Étain" } },
+            { "Naturel", new List<string> { "Algues entrelacées", "Bamboo / Papier", "Bambou", "Bambou / ABS", "Bambou / Caoutchouc / Graphite", "Bambou / Coton", "Bambou / Fibre de blé", "Bambou / Fibre de blé / PP", "Bambou / Papier de verre", "Bambou / Plastique / Coton", "Bambou / Polyester RPET", "Bambou / Velours", "Bambou / Verre", "Bambou/Encens", "Bambou/Verre/Cire d'abeille et végétale", "Bois de Bambou / Polyester", "Carton", "Carton / Encens", "Carton / Fibre de blé et PP", "Carton / Papier", "Carton / Papier / Bambou", "Carton Kraft", "Carton de briques de lait", "Carton de briques de lait / bambou", "Chanvre", "Cire végétale / Paraffine / Bois", "Cire végétale / Paraffine / Liège", "Cire végétale 80% / Paraffine raffinée 20%", "Coton laminé / Jute laminé", "Feuille de maïs", "Fibre de blé / PP", "Fibre de blé / PP (Antibactérien)", "Fibre de coco / Polypropylène", "Fibre de coco / Polypropylène / Nylon", "Juco/Jute/Coton", "Jute", "Jute / Coton", "Jute / PP laminé à l'intérieur", "Jute laminé / Coton", "Jute laminé / PP / Coton / Aluminium", "Jute non laminé", "Konjac", "Liège", "Liège / Fibre de blé / PP", "Liège / Fibre de blé et PP", "Loofah / Bois", "Mélange de jute et coton laminé", "Paille", "Paille Flexible", "Paille en papier", "Paille flexible", "Papier", "Papier 210gr/m2", "Papier 80 gr", "Papier Recyclé", "Papier d´herbe / Papier", "Papier en pâte de bois 200 gr/m² avec diverses graines de camomille, pavot, marguerite, lavande, menthe poivrée ou centaurée.", "Papier en pâte de bois de 140 gr/m² avec graines de camomille, coquelicot, marguerite et lavande,  menthe poivrée ou centaurée.", "Papier en pâte de bois de 140 gr/m² avec graines de camomille, coquelicot, marguerite et lavande.", "Papier en pâte de bois de 140 gr/m² avec graines de camomille, coquelicot, marguerite, lavande, menthe poivrée ou centaurée.", "Papier en pâte de bois de 140 gr/m² avec graines de camomille, coquelicot, marguerite, lavande, menthe poivrée ou centaurée. (Marquage 1 face quadri inclus. Consultez bord à bord).", "Papier en pâte de bois de 200 gr/m² avec graines de camomille, coquelicot, marguerite et lavande, menthe poivrée ou centaurée.", "Papier en pâte de bois de 200 gr/m² avec graines de camomille, coquelicot, marguerite et lavande.", "Papier en pâte de bois de 200 gr/m² avec graines de camomille, coquelicot, marguerite, lavande, menthe poivrée ou centaurée.", "Papier en pâte de bois de 200 gr/m² avec graines de camomille, coquelicot, marguerite, lavande, menthe poivrée ou centaurée. (Marquage 1 face quadri inclus. Consultez bord à bord).", "Papier journal recyclé", "Papier kraft", "Parchemin", "Pierre Jade", "Polyoléfines / Bois de hêtre", "Syndopal RSPO végétal / 1% jacynthe 722", "Syndopal Vegetal RSPO / 1% Jacinthe 722", "Toile / Pastel", "Toile laminée naturelle / Jute laminé", "Vegetal Estd.", "Végétal Estd." } },
+            { "Non tissé", new List<string> { "Non Tissé / 75% Alcool", "Non Tissé / Alcohol 75%", "Non Tissé / Coton laminé PET", "Non Tissé Laminé PP", "Non tissé / Craie" } },
+            { "Nylon", new List<string> { "600 D", "840D Nylon", "Nylon", "Nylon / Cuivre", "Nylon / Polyester", "Nylon 1200D", "Nylon 230D / Polyester 800D", "Nylon 420D", "Nylon 50% / Polyester 50%", "Woven Nylon 1200D", "Woven Nylon 210D" } },
+            { "Osier", new List<string> { "Osier / Bois / Acier inoxydable / Céramique / Plastique / PP / Polyester", "Osier / Bois / Inox / Céramique / Plastique / PP / Mousse isolante" } },
+            { "PP", new List<string> { "PP / Acier inoxidable", "PP / Paper" } },
+            { "PU", new List<string> { "Boîte: Pu, Roller: Métal", "Boîte: Pu, Stylo et Roller: Métal", "Boîte: Pu, Stylo: Métal", "Feutrine RPET2mm/ PU", "PU / ABS / Aluminium", "PU / Aluminio reciclado / Cartón", "PU / Métal", "PU / PEVA", "PU / Papier", "PU / Plastique", "PU / RPET", "PU / Suèdine", "PU / papier", "Polyuréthane/ Papier", "Pu", "Pu/Abs/PVC", "Pu/Aluminium", "Pu/Métal", "Pu/Métal/Carton", "Pu/Papel", "Pu/Verre" } },
+            { "PVC", new List<string> { "Boîte: PVC / Aluminium / Stylo: Métal", "Boîte: Pvc/Aluminium, Stylo et Roller: Métal", "Boîte: Pvc/Aluminium, Stylo: Métal", "PVC / Aluminium", "PVC / Cuivre", "PVC / Métal", "PVC / Polyester", "PVC/ Métal", "PVC/Cuivre", "Pvc/Bois", "Pvc/Céramique", "Pvc/coton" } },
+            { "Paille", new List<string> { "Paille/Polyester" } },
+            { "Papier", new List<string> { "Papier / Bois / Plastique", "Papier / Carton", "Papier / Plastique", "Papier / Polyester", "Papier en pâte de bois de 120 gr/m² avec graines de camomille, coquelicot, marguerite, lavande, menthe poivrée ou centaurée.", "Papier en pâte de bois de 120 gr/m² avec graines de camomille, coquelicot, marguerite, lavande, menthe poivrée ou centaurée. (Marquage 1 face quadri inclus. Consultez bord à bord).", "Papier en pâte de bois de 200 gr/m² avec graines de camomille, coquelicot, marguerite et lavande.", "Papier/Bois", "Papier/Carton", "papier" } },
+            { "Papier cartonné", new List<string> { "Papier Cartonné" } },
+            { "Papier plastifié", new List<string> { "Papier plastifié" } },
+            { "Paraffine", new List<string> { "Paraffine / boîte", "Paraffine/Encens" } },
+            { "Peau synthétique", new List<string> { "Cuir" } },
+            { "Perle", new List<string> { "Perle" } },
+            { "Pierre", new List<string> { "Pierre/Acier Inoxydable" } },
+            { "Plastique", new List<string> { "ABS", "ABS / EVA", "ABS / PU", "ABS / PVC", "ABS recyclé", "ABS/Synthétique", "AS", "Abs", "Abs/Pu", "Abs/Silicone", "Acrylique", "Acrylique 120 gms / EPE / PP / RPET 600D", "Boîte: Plastique / Stylo: Métal", "Caoutchouc", "Carton de briques de lait", "EVA", "Eva", "Fibre de verre / EVA / Pongé", "Gomme", "Gomme EVA", "Non Tissé", "Non tissé", "Néoprène", "PE", "PE épaisseur 0,025", "PETG", "PETG / PP", "POE / Polyester", "PP", "PP / Fibre de blé / Silicone", "PP laminé", "PP tissé", "PU", "PU / ABS / PVC", "PU 210D", "PU 600D Résistant à l'eau", "PU 900D", "PU 900D Résistant à l'eau", "PU 900D imperméable", "PU recyclé", "PVC", "PVC / ABS", "PVC / Paraffine", "PVC / Plastique", "PVC / Savon", "Paraffine", "Plastic", "Plastique", "Plastique (Polyéthylène)", "Plastique (type de Plastique: PC)", "Plastique / Acier Inoxidable 201", "Plastique / Acier inoxidable", "Plastique / Aluminium", "Plastique / Bambou", "Plastique / Caoutchouc", "Plastique / Carton", "Plastique / Cire", "Plastique / Céramique", "Plastique / Litio", "Plastique / Metal", "Plastique / Métal Clip", "Plastique / Non Tissé Alcool 75%", "Plastique / Silicone", "Plastique AS", "Plastique PP", "Plastique PS/PVC", "Plastique UV400", "Plastique antibactérien", "Plastique/Acier Inoxydable", "Plastique/Aluminium", "Plastique/Carton", "Plastique/Métal", "Plastique/Métal Clip", "Plastique/Suedine", "Plástico", "Plástique", "Polirésine", "Polypropylène", "Polypropylène 50 microns", "Polypropylène Environnemental (BOPP + VMPET)", "Polyrésine", "Polyuréthane", "Polyéthylène", "Pu (sans PVC)", "Pu Haute Qualité", "Pu/Abs/Pvc", "Pu/Plastique", "Pvc", "RPET", "RPET 210D", "RPET 300D", "RPET 300D / PU", "RPET Polyester", "Rpet 210", "Rpet 600D", "Silicona / ABS", "Silicone", "Silicone / ABS", "Simili cuir", "Solution hydroalcoolique: 75% d'alcool / Bouchon: PP / Tube: PS", "Solution hydroalcoolique: 75% d'alcoolb / Bouchon: PP / Tube: PS", "TPE / NBR", "TPU", "TPU / ABS", "TPU(Polyuréthanne thermoplastique)", "Tritan", "Tritán", "Téflon", "Éponge / PE" } },
+            { "Poche", new List<string> { "Pounch/Aluminium" } },
+            { "Policoton", new List<string> { "Poly-coton / Jute" } },
+            { "Polyester", new List<string> { "30 % Polyester recyclé / 70 % Polyester", "30 % Polyester recyclé /70 % Polyester", "300D Polyester RPET", "65% Polyester / 35% Coton / PEVA", "65% Polyester RPET / 35% Coton / PEVA", "Bande: TPE / Sac: Polyester RPET", "Bandes: TPE / Sac: Polyester RPET", "Bois / Polyester", "Feutre Polyester RP / 2mm.", "Feutrine RPET", "Flanelle de Polyester", "Housse : Polyester / Coton. Remplissage:  PVC", "Microfibra", "Microfibre", "Microfibre RPET 67% / Polyester 33%", "Moss Polyester", "Non Tissé", "Non Tissé Laminé", "Non Tissé RPET", "Non Woven RPET", "Non tissé", "PU 900D Résistant à l'eau / 300D Polyester RPET", "Polaire Antipilling", "Polaire Antipilling 200gr/m2", "Polaire Polyester 180gr/m2", "Polar RPET / 600D RPET / PEVA", "Poliester 600 D", "Poliéster", "Polycanvas", "Polyester", "Polyester / Aluminium", "Polyester / Bois", "Polyester / Caoutchouc", "Polyester / Coton", "Polyester / Métal", "Polyester / Non tissé", "Polyester / Nylon", "Polyester / PU", "Polyester / Papier", "Polyester / Plume", "Polyester / Polaire", "Polyester / Polyamide", "Polyester / Woven", "Polyester / polyamide", "Polyester / Élasthanne", "Polyester 1200D", "Polyester 1680D", "Polyester 170T", "Polyester 200 gr", "Polyester 200D", "Polyester 210D", "Polyester 210D RPET", "Polyester 210D/Polaire", "Polyester 280D", "Polyester 300D", "Polyester 300D / 50% RPET", "Polyester 300D RPET", "Polyester 420D", "Polyester 420D / Nylon", "Polyester 420D 70% / RPET 30%", "Polyester 50% / Coton 50%", "Polyester 500D", "Polyester 600D", "Polyester 600D / Acier", "Polyester 600D / Papier", "Polyester 600D / Sans PVC", "Polyester 600D 3 tone", "Polyester 600D RPET / Carton / Papier", "Polyester 600D Two Tone", "Polyester 600D/Néoprène", "Polyester 70% / Viscose 30%", "Polyester 80% / Poliamyde 20%", "Polyester 840D", "Polyester Jacquard", "Polyester Jeans", "Polyester Polaire", "Polyester RPET", "Polyester RPET / ABS", "Polyester RPET / Métal / Carton", "Polyester RPET 1200D", "Polyester RPET 190T", "Polyester RPET 300D", "Polyester RPET 500D / PU", "Polyester RPET 600D", "Polyester RPET 80% et 20% Poliamide", "Polyester Reflechissant", "Polyester imperméable", "Polyester imperméable 300D", "Polyester rembourré", "Polyester/Aluminium", "Polyester/Bois", "Polyester/Metal", "Polyester/Polyamide", "Polyester/Pvc", "Polyuréthane / Polyester", "Pongé Rpet", "Pongée RPET", "RPET / Panneau arrière Polyester 420D", "RPET 1680D", "RPET 30% / Polyester 70%", "RPET 300D", "RPET Two Tone", "RPET non tissé", "RPET non woven", "Satin", "Velours", "Velours Polyester", "Velours côtelé en Polyester" } },
+            { "Polypropylène", new List<string> { "Polypropylène / Papier" } },
+            { "Pongée", new List<string> { "Pongee / Fibre de verre", "Pongee 190T/ Acier inox/ Fibre de verre", "Pongee RPET / Métal / Fibre de Verre", "Pongee/Fibre de verre", "Pongé / Fibre de verre", "Pongé 190T/Acier zingué/ABS", "Pongé Rpet / Métal / Fibre de verre" } },
+            { "RPET", new List<string> { "Nylon RPET", "Plastique RPET / Acier inoxydable", "RPET 300D / bambou", "RPET 300D 48% et Nylon", "RPET 600D / Aluminium / PEVA" } },
+            { "Savon", new List<string> { "Savon" } },
+            { "Silicone", new List<string> { "Silicone / Plastique / Métal" } },
+            { "Solution hydroalcoolique", new List<string> { "Solution hydroalcoolique: 75% Alcool" } },
+            { "Textile", new List<string> { "Chiffon", "Feutre", "Microfibre", "Non Tissé 80 gr", "Non Tisé", "Non Woven", "Non tissé Laminé", "Néoprène", "Polar Antipilling", "Rayon", "Satin", "Velours", "Viscose" } },
+            { "Tissu", new List<string> { "Tissu Interlock / Éponge", "Tissu interlock / Éponge" } },
+            { "Toile", new List<string> { "Canvas / Métal", "Toile / Polyester / EVA", "Toile Laminée", "Toile recyclée" } },
+            { "Tritan", new List<string> { "Tritan / Acier Inoxidable" } },
+            { "Velours", new List<string> { "Velours / Imitation satin", "Velours / Papier", "Velours/Pvc" } },
+            { "Verre", new List<string> { "Borosilicate / Bambou", "Liège / Verre", "Pierre / Verre / Huile parfumée / Carton", "Verre", "Verre / Acier inoxidable / néoprène", "Verre / Acier inoxydable", "Verre / Acier inoxydable / néoprène", "Verre / Bois", "Verre / Bois / Silicone", "Verre / Carton", "Verre / Cire", "Verre / Cire / Fragrance", "Verre / Métal", "Verre / Métal / Cire / Fragrance", "Verre / Paraffine", "Verre Borosilicate / Acier inoxydable", "Verre/Bois", "Verre/Paraffine" } },
+            { "Viscose", new List<string> { "Viscose" } },
+        };
+    else if (langCode == "en")
+        materialGroups =         new Dictionary<string, List<string>>
+        {
+            { "38% Cotton", new List<string> { "38% Cottom/ 40% Polyester/ 22% Rayon" } },
+            { "40% Polyester 60% Cotton", new List<string> { "40% Polyester 60% Cotton" } },
+            { "ABS", new List<string> { "ABS / Aluminium", "ABS / Aluminum", "ABS / Metal Clip", "ABS / Polyester", "ABS / Rubber", "ABS / Silicone", "ABS/Semitation leather", "Abs/Aluminio", "Abs/Aluminum", "Abs/Cardboard", "Abs/Metal" } },
+            { "Aluminum", new List<string> { "ABS / Aluminum", "Aluminium / ABS", "Aluminum / ABS", "Aluminum / Bamboo", "Aluminum/Cork", "Aluminum/Pu", "Pounch/Aluminum", "Rubber Finishing Aluminum" } },
+            { "Bamboo", new List<string> { "Baboo / Polyester", "Bamboo / ABS", "Bamboo / Acrylic", "Bamboo / Acrylic plastic", "Bamboo / Aluminum / ABS", "Bamboo / Glass / Polypropylene", "Bamboo / Metal", "Bamboo / Metal / ABS", "Bamboo / Metal / Rubber", "Bamboo / Mirror / PU", "Bamboo / Polyester", "Bamboo / Polyester / ABS / Acrylic", "Bamboo / Rubber", "Bamboo / Silicone", "Bamboo / Steel", "Bamboo/Polyester" } },
+            { "Borosilicate", new List<string> { "Borosilicate / Cork" } },
+            { "Box: PU", new List<string> { "Box:Pu, Ballpen:Metal", "Box:Pu, Roller: Metal", "Box:Pu,Ballpen and Roller: Metal" } },
+            { "Box: PVC", new List<string> { "Box:PVC / Aluminium / Roller:Metal", "Box:Pvc/Aluminium, Ballpen:Metal", "Box:Pvc/Aluminium, ballpen and Roller:Metal" } },
+            { "Box: Plastic", new List<string> { "Box:Plastic / Ballpen:Metal" } },
+            { "Canvas", new List<string> { "Canvas / Metal", "Canvas / Polyester / EVA", "Canvas / Wax Crayon", "Laminated Canvas", "Recycled canvas" } },
+            { "Card", new List<string> { "Card/Chocolate" } },
+            { "Cardboard", new List<string> { "Cardboard", "Cardboard / Cork", "Cardboard / Cork / PU", "Cardboard / Fruit paper / Paper", "Cardboard / Magnet", "Cardboard / Metal", "Cardboard / PU / Bamboo", "Cardboard / PU / Metal", "Cardboard / Paper", "Cardboard / Polyester", "Cardboard / RPET / Recycled aluminum", "Cardboard / Stone paper", "Cardboard / Wheat Fiber and PP", "Cardboard / Wheat fiber / PP", "Cardboard / Wood", "Cardboard from milk cartons / Paper", "Cardboard/Crystal", "Cardboard/Incense/Ceramic", "Cardboard/Magnetized", "Cardboard/Plaster", "Cardboard/Pvc", "Carton", "Cartón / Acero inoxidable reciclado / PU / Aluminio reciclado", "Cartón / Cartón de leche / Aluminio reciclado", "Cartón / PU / Acero inoxidable / Acero inoxidable reciclado", "Cartón / PU / Acero inoxidable reciclado / Bambú / Poliéster / Abs / Acrílico", "Cartón / PU Reciclado / Aluminio reciclado", "Cartón / RPET / Bambú / Aluminio reciclado", "Paperboard" } },
+            { "Ceramic", new List<string> { "Ceramic", "Ceramic / Cork", "Ceramic/Paraffin", "Ceramic/Wood", "Ceramics", "Cerámica", "Chalk", "Stoneware", "Terracota" } },
+            { "Coated Paper", new List<string> { "Coated paper" } },
+            { "Cork", new List<string> { "Cork / PU", "Cork / Paper", "Cork / Recycled ABS", "Cork / Wood / Silicone", "Cork/Metal", "Cork/Pu" } },
+            { "Cotton", new List<string> { "100% Algodón", "100% Cottom", "100% Cotton", "220 gr/m2 Cotton / Polyester", "85% Cotton / 15% Lurex", "90% cotton / 10% Polyester", "Algodón", "Antibacterial Cotton", "Bamboo / Cotton / Linen", "Black: Cotton / Natural: Cotton Jute", "Brushed / Cotton", "Brushed Cotton", "Brushed/Cotton", "Canvas", "Corduroy", "Cottom", "Cotton", "Cotton / Aluminum", "Cotton / Jute", "Cotton / Meltblown", "Cotton / Metal", "Cotton / PE", "Cotton / Polyester", "Cotton / Polyester / PU", "Cotton / Recycled Cotton", "Cotton / Recycled Denim", "Cotton / Spunbond", "Cotton / Velvet", "Cotton / Wood", "Cotton 100%", "Cotton 70% / Seaqual 30%", "Cotton 80% / Polyamide 16% / Elastane 4%", "Cotton 80% / Polyamide 18% / Elastane 2%", "Cotton 80% / Polyester 20%", "Cotton Cord / Metal", "Cotton Fairtrade", "Cotton OEKO-TEX", "Cotton/Metal", "Cotton/Polyester", "Cotton/Pvc", "Cotton/Soap", "Cotton/Velvety", "Cubes: Marble / Bag: Cotton", "Fair Trade Cotton", "Fairtrade Cotton", "Fairtrade Cotton / Jute", "Fairtrade Cotton 100%", "Fairtrade Recycled Cotton", "Kraft Paper / Cotton", "Laminated Cotton", "Laminated Cotton  / Laminated Yute", "Laminated Cotton Canvas", "Natural canvas", "Natural recycled canvas", "OEKO-TEX Cotton", "Organic Cotton", "Organic Cotton 100%", "Organic cotton", "Outside recycled Cotton / Inside non woven.", "Outside: 60% Cotton, 40% Polyester / Inside: Cotton", "Outside: Cotton / Inside: Polyester", "Paper / Cotton", "Pareo: 80% Cotton; 20% Polyester / Towel: 100% Polyester", "Polyester 10% / Cotton 90%", "Recicled Cotton", "Recycled Canvas", "Recycled Cotton", "Recycled Cotton / Jute", "Recycled Cotton / Organic Cotton", "Recycled Cotton / Polyester", "Recycled Cotton / Recycled Polyester", "Recycled Cotton and Polyester", "Recycled Denim", "Recycled Laminated Canvas", "Recycled cotton", "Recycled cotton / Polyester", "Recycled cotton / recycled Polyester", "Rubber / Cotton", "Velvet / Cotton" } },
+            { "EVA", new List<string> { "Eva/Pvc" } },
+            { "Fabric", new List<string> { "Interlock Fabric / Sponge", "Interlock fabric / sponge" } },
+            { "Felt", new List<string> { "Felt / Non Woven" } },
+            { "Fleece", new List<string> { "Antipilling Polar", "Antipilling Polar 200gr/m2" } },
+            { "Glass", new List<string> { "Borosilicate / Bamboo", "Borosilicate Glass / Stainless Steel", "Cardboard/Glass", "Cork / Glass", "Crystal / Paraffin / Vegetable Wax", "Glass", "Glass / Bamboo", "Glass / Bamboo / Mikado Sticks", "Glass / Bamboo / Vegetable wax / Paraffin 95% / Perfume 5%", "Glass / Bamboo / Vegetable wax 80% / Refined Paraffin 15% / Fragance 5%", "Glass / Cardboard", "Glass / Lid: Recycled Plastic", "Glass / Metal / Wax / Fragrance", "Glass / PP / Aluminum", "Glass / Paraffin", "Glass / Paraffin / Wood", "Glass / Plastic / Fragrance", "Glass / Plastic / Oil", "Glass / Stainless Steel", "Glass / Stainless Steel / Neoprene", "Glass / Stainless steel", "Glass / Wax / Fragrance", "Glass / Wood", "Glass / Wood / Silicone", "Glass/Fragrance/DPM/Rattan", "Glass/Paraffin", "Glass/Plastic/Oil", "Glass/Wood", "Glassl / Wax", "Glasspack", "Stone / Glass / Fragrance oil / Cardboard box" } },
+            { "Hydroalcoholic Solution", new List<string> { "Hydroalcoholic Solution" } },
+            { "Imitation Leather", new List<string> { "Imitation Leather" } },
+            { "Leather", new List<string> { "Cow leather", "Leather/Metal", "Nappa Leather", "Patent Leather", "Recycled Leather", "Recycled leather / Paper" } },
+            { "Metal", new List<string> { "304 Stainless Steel", "Alloy", "Aluminium", "Aluminum", "Aluminum Alloy", "Aluminum/Rubber", "Bamboo / Metal / Magnet", "Cork / Metal", "Cotton / Metal", "Iron", "Jade / Metal", "Latón", "METAL", "Metal", "Metal / ABS", "Metal / Cardboard", "Metal / Cotton", "Metal / Fabric", "Metal / PU", "Metal / PVC", "Metal / Paraffin", "Metal / Pu", "Metal / Rubber", "Metal / Vaseline", "Metal / Wood", "Metal/Madera", "Metal/Plastic", "Metal/Pvc", "Metal/Soap", "Métal", "Nylon 170T / Metal", "PU / Metal", "PU / Metal / Cardboard", "Pongee 190T / Stainless Steel / Fiberglass", "Recycled Aluminium", "Recycled Aluminium / Bamboo", "Recycled Aluminum", "Recycled Aluminum / Bamboo / Rubber", "Recycled Aluminum / Rubber / Graphite", "Recycled Stainless Steel", "Recycled Stainless Steel 304", "Recycled Stainless Steel 304 inside / Recycled Stainless Steel 201 outside", "Recycled aluminium", "Recycled aluminum / Rubber", "Recycled stainless steel 304", "Stainless Steel", "Stainless Steel / Bamboo", "Stainless Steel / Cotton", "Stainless Steel 201 outside / Stainless Steel 304 inside", "Stainless Steel 304", "Stainless Steel 304 / Bamboo", "Stainless Steel 304 inside / Stainless Steel 201 outside", "Stainless Steel inside 304 / outside 201", "Stainless Steel/Satin", "Stainless Steell", "Stainless stee", "Stainless steel", "Steel", "Tin", "Zinc", "glass / Metal" } },
+            { "Microfiber", new List<string> { "Microfiber / PVC free", "Microfibra" } },
+            { "Natural", new List<string> { "30% Wheat fiber and 70% PP", "Bamboo", "Bamboo / ABS", "Bamboo / Cotton", "Bamboo / Glass", "Bamboo / Glass / Bee wax / Vegetal wax", "Bamboo / Paper", "Bamboo / Plastic / Cotton", "Bamboo / RPET Polyester", "Bamboo / Rubber / Graphite", "Bamboo / Sandpaper", "Bamboo / Silicone", "Bamboo / Velvet", "Bamboo / Wheat fiber", "Bamboo / Wheat fiber / PP", "Bamboo wood / Polyester", "Bamboo/Inciense", "Bamboo/Silicone", "Card / Paper", "Cardboard", "Cardboard / Paper", "Cardboard / Paper / Bamboo", "Cardboard / Wheat fiber and PP", "Carton / Incense", "Coconut fiber / Polypropylene", "Coconut fiber / Polypropylene / Nylon", "Cork", "Cork / PP / Wheat fiber", "Cork / Paper", "Cork / Wheat fiber / PP", "Corn husk", "Ecological Paper", "Ecological paper", "Flexible Hay", "Flexible Straw", "Grass Paper / Paper", "Hay", "Hemp", "Interwoven Algae", "Juco/Jute/Cotton/Inside PP material.Pvc free", "Jute", "Jute / Cotton", "Jute / Laminated PP inside", "Konjac", "Kraft Cardboard", "Kraft Paper", "Kraft paper", "Laminated Cotton  / Laminated Yute", "Laminated Juco", "Laminated Jute", "Loofah / Wood", "Milk Carton Bricks", "Milk Carton Bricks / Bamboo", "Natural Jute Laminated / Canvas", "Natural laminated canvas / Laminated jute", "Newspaper Recycled Paper", "PP / Laminated Jute / Cotton / Aluminum foil", "Papel de pulpa de madera de 200 gr/m² con semillas variadas de manzanilla, amapola, margarita, lavanda, hiervabuena o centaurea.", "Paper", "Paper 210gr/m2", "Paper 80 gr", "Paper Hay", "Paper Kraft", "Paperboard", "Parchment", "Pearl", "Polyolefins / Beech wood", "Recycled Paper", "SYNDOPAL VEGETAL RSP", "Sraw", "Stone Jade", "Straw", "Syndopal Vegetal RSPO / 1% Jacinthe 722", "Unlaminated jute", "Vegetable Wax 80% / Refined Paraffin 20%", "Vegetable wax / Paraffin / Cork", "Vegetable wax / Paraffin / Wood", "Vegetal Estd.", "Wax", "Wheat Fiber / PP", "Wheat Straw / PP (Antibacterial)", "Wheat Straw / PP / Cork", "Wheat fiber / PP", "Wheat fiber / PP (Biodegradable)", "Wheat fiber 60% / PP 40%", "Wheat fiber and PP", "Wood pulp paper of 140 gr/m² with assorted seeds as chamomile, poppy, daisy, lavender, spearmint or centaurea.", "Wood pulp paper of 140 gr/m² with chamomile, poppy, daisy and lavender seeds.", "Wood pulp paper of 200 gr/m² with assorted seeds as chamomile, poppy, daisy, lavender, spearmint or centaurea.", "Wood pulp paper of 200 gr/m² with chamomile, poppy, daisy and lavender seeds.", "Yute" } },
+            { "Non Woven", new List<string> { "Non Woven / 75% alcohol", "Non Woven / Cotton with PET lamination", "Non woven", "Non woven / Alcohol 75%", "Non woven / Crayon" } },
+            { "Nylon", new List<string> { "840D Nylon", "Nylon", "Nylon / Copper", "Nylon / Polyester", "Nylon 1200D", "Nylon 230D / Polyester 800D", "Nylon 420D", "Nylon 50% / Polyester 50%", "Woven Nylon 1200D", "Woven Nylon 210D" } },
+            { "PP", new List<string> { "PP / Paper", "PP / Stainless Steel" } },
+            { "PU", new List<string> { "PU / ABS / Aluminum", "PU / Aluminio reciclado / Cartón", "PU / Metal", "PU / PEVA", "PU / Paper", "PU / Plastic", "PU / RPET", "PU / Suede", "Phelt RPET 2mm / PU", "Polyurethane/ Paper", "Pu/Abs/PVC", "Pu/Abs/Pvc", "Pu/Aluminum", "Pu/Glass", "Pu/Metal", "Pu/Metal/Carton", "Pu/Papel" } },
+            { "PVC", new List<string> { "PVC / Aluminum", "PVC / Copper", "PVC / Metal", "PVC / Polyester", "PVC/ Metal", "PVC/Copper", "Pounch: Pvc,Ballpen:Metal", "Pvc/Ceramic", "Pvc/Wood", "Pvc/coton" } },
+            { "Paper", new List<string> { "Carton", "Papel / Polyester", "Paper / Cardboard", "Paper / Paperboard", "Paper / Plastic", "Paper / Wood / Plastic", "Paper/Carton", "Wood pulp paper of 120 gr/m² with assorted seeds as chamomile, poppy, daisy, lavender, spearmint or centaurea.", "Wood pulp paper of 200 gr/m² with chamomile, poppy, daisy and lavender seeds." } },
+            { "Paraffin", new List<string> { "Paraffin", "Paraffin/Incense", "Parafinn / Jar" } },
+            { "Patent Leather", new List<string> { "Patent leather/Polyester" } },
+            { "Plastic", new List<string> { "210 PU", "210 RPET", "3mm Polyester felt", "600D PU Waterproof", "600D RPET", "900D PU", "900D PU Waterproof", "ABS", "ABS / EVA", "ABS / PU", "ABS / PVC", "AS", "AS Plastic", "Abs", "Abs/Pu", "Abs/Silicone", "Acrilic 120 gms / EPE / PP / RPET 600D", "Acrylic", "Antibacterial Plastic", "Carton of milk cartons", "EVA", "EVA Foam", "Enviromental Polypropylene (BOPP+VMPET)", "Eva", "Hydroalcoholic Solution / Top: PP / Body: PS.", "Neoprene", "Non Woven", "Non woven", "PE", "PE thickness 0,025", "PETG", "PETG / PP", "POE / Polyester", "PP", "PP / Wheat Fiber / Silicone", "PP Laminated", "PP Laminated Non Woven", "PP Woven", "PP woven", "PS Plastic/PVC", "PU", "PU / ABS / PVC", "PVC", "PVC / ABS", "PVC / Paraffin", "PVC / Plastic", "PVC / Soap", "Plastic", "Plastic (Polyethylene)", "Plastic (type of plastic: PC)", "Plastic / Aluminum", "Plastic / Bamboo", "Plastic / Cardboard", "Plastic / Lithium", "Plastic / Metal", "Plastic / Metal Clip", "Plastic / Non Woven 75% Alcohol", "Plastic / Pottery", "Plastic / Rubber", "Plastic / Silicon", "Plastic / Stainless Steel", "Plastic / Stainless Steel 201", "Plastic / Wax", "Plastic PP", "Plastic UV400", "Plastic/Aluminum", "Plastic/Cardboard", "Plastic/Metal", "Plastic/Metal Clip", "Plastic/Stainless Steel", "Plastic/Suede", "Plastique", "Plástico", "Polipropileno 50 microns", "Polyethylene", "Polypropylene", "Polyresin", "Polyurethane", "Pu (PVC free)", "Pu High Quality", "Pu/Plastic", "Pvc", "RPET", "RPET 300D", "RPET 300D / PU", "RPET Polyester", "Recycled ABS", "Recycled PU", "Rubber", "Shaft and Frame: Fiberglass / Handle: EVA / Fabric: Pongee", "Silicone", "Silicone / ABS", "Silicone / Abs", "Sponge / PE", "TPE / NBR", "TPU", "TPU / ABS", "TPU(Thermoplastic polyurethane)", "Teflón", "Tritan", "Tritán" } },
+            { "Poly-cotton", new List<string> { "Polycotton / Jute" } },
+            { "Polyester", new List<string> { "1680D Polyester", "280D Polyester", "30% Recycled Polyester 70% Polyester", "300D Polyester RPET", "300D RPET Polyester", "300D RPET Polyester / 900D PU Waterproof", "500D Polyester", "500D RPET Polyester / PU", "600 D", "600D Polyester", "600D Polyester Two Tone", "65% Polyester RPET / 35% Cotton / PEVA", "80 Polyester RPET / 20% Polyamide", "Cover: Polyester / Cotton / Inner: PVC", "Fabric / Wood / Polyester", "Handle: TPE / Bag: Polyester RPET", "Handles: TPE / Bag: Polyester RPET", "Jeans Polyester", "Microfiber", "Moss Polyester", "Non Woven RPET", "Padded Polyester", "Phelt RPET", "Polar Antipiling", "Polar Polyester", "Polar Polyester 180gr/m2", "Polar RPET / 600D RPET / PEVA", "Poliester 600 D", "Poliéster", "Polycanvas", "Polyester", "Polyester / Aluminum", "Polyester / Cotton", "Polyester / Feather", "Polyester / Metal", "Polyester / Non woven", "Polyester / Nylon", "Polyester / PU", "Polyester / Paper", "Polyester / Polar", "Polyester / Polyamide", "Polyester / Rubber", "Polyester / Spandex", "Polyester / Wood", "Polyester / Woven", "Polyester / polyamide", "Polyester 1200D", "Polyester 1680D", "Polyester 170T", "Polyester 200 gr", "Polyester 200D", "Polyester 210D", "Polyester 210D/Polar", "Polyester 300D", "Polyester 300D / 50% RPET", "Polyester 420D", "Polyester 420D / Nylon", "Polyester 420D 70% / RPET 30%", "Polyester 50% / Cotton 50%", "Polyester 500D", "Polyester 600D", "Polyester 600D / PVC free", "Polyester 600D / Paper", "Polyester 600D / Steel", "Polyester 600D 3 Tone", "Polyester 600D RPET / Cardboard / Paper", "Polyester 600D/Neoprene", "Polyester 70% / Viscose 30%", "Polyester 80% / Polyamide 20%", "Polyester 840D", "Polyester Corduroy", "Polyester Jacquard", "Polyester RPET", "Polyester RPET 600D", "Polyester Reflecting", "Polyester Velvet", "Polyester flannel", "Polyester velvet", "Polyester/Aluminum", "Polyester/Metal", "Polyester/Polar", "Polyester/Pvc", "Polyester/Wood", "Polyurethane / Polyester", "Pongee RPET", "Pongee Rpet", "RP / 2mm Polyester felt.", "RPET / Back panel Polyester420D", "RPET 1680D Polyester", "RPET 30% / Polyester 70%", "RPET 300D Polyester", "RPET Microfiber 67% / Polyester 33%", "RPET Polyester", "RPET Polyester / ABS", "RPET Polyester / Metal / Cardboard", "RPET Polyester 1200D", "RPET Polyester 210D", "RPET Polyester 300D", "RPET Polyester 600D", "RPET non woven", "RPETTwo Tone", "Satin", "Wateproof Polyester", "Waterproof Polyester, Polyester 300D" } },
+            { "Polypropylene", new List<string> { "Polypropylene / Paper" } },
+            { "Pongee", new List<string> { "190T Pongee/Plated Steel/ABS", "Pongee / Fiber glass", "Pongee / Fiberglass", "Pongee 190T/Stainless Steel/Fiberglass", "Pongee/Fiberglass", "RPET Pongee / Metal / Fiber glass", "RPET Pongee / Metal / Fiberglass" } },
+            { "RPET", new List<string> { "300D RPET / Bamboo", "RPET 300D 48% and Nylon", "RPET 600D / Aluminum / PEVA", "RPET Nylon", "RPET Plastic / Stainless Steel" } },
+            { "Rubber", new List<string> { "Rubber", "Rubber / Plastic", "Rubber/Plastic" } },
+            { "Silicone", new List<string> { "Silicone / Plastic / Metal" } },
+            { "Soap", new List<string> { "Soap" } },
+            { "Sponge", new List<string> { "Sponge / Plastic", "Sponge/Pvc" } },
+            { "Stainless Steel", new List<string> { "304 Stainless steel / PP / Silicone / Aluminium", "305 Stainless steel / PP / Silicone / Aluminium", "306 Stainless steel / PP / Silicone / Aluminium", "307 Stainless steel / PP / Silicone / Aluminium", "Cutlery: 304 Stainless Steel / Bag: 600D RPET", "Recycled Stainless Steel / PP", "SS / PP", "SS / PP / Silicone", "Stainless Steel / Bamboo", "Stainless Steel / Rubber", "Stainless Steel / Wood", "Stainless Steel 304 Inside/201 outside", "Stainless Steel inside 304 / outside 201 / Bamboo", "Stainless Steel inside 304 / outside 201 / PP and silicone for lid", "Stainless Steel inside 304 / outside 201 / Silicone / PP", "Stainless Steel/Nylon 300D", "Stainless Steel/Pvc", "Stainless Steel/Wood", "Stainless steel / PU / Cardboard" } },
+            { "Stone", new List<string> { "Stone/Stainless steel" } },
+            { "Straw", new List<string> { "Straw/Polyester" } },
+            { "Suede", new List<string> { "Suede", "Suede/Pvc" } },
+            { "Synthetic Leather", new List<string> { "Leather" } },
+            { "Textile", new List<string> { "Chiffon", "Felt", "Laminated Non Woven", "Leather", "Leather Looking", "Microfiber", "Non Woven", "Non Woven 80 gr", "Pu", "Rayon", "Satin", "Velvet", "Velvet / Satin Imitation", "Viscose" } },
+            { "Tritan", new List<string> { "Tritan / Stainless Steel" } },
+            { "Vegetable Wax", new List<string> { "Vegetable wax / Fragrance / Glass" } },
+            { "Velvet", new List<string> { "Velvet", "Velvet / Paper" } },
+            { "Viscose", new List<string> { "Viscose" } },
+            { "Wheat Seeds", new List<string> { "Wheat seeds / Natural Lavender / Cotton fabric" } },
+            { "Wicker", new List<string> { "Wicker / Wood / Stainless Steel / Ceramic / Plastic / PP / Insulating Foil", "Wicker / Wood / Stainless Steel / Ceramic / Plastic / PP / Polyester" } },
+            { "Wood", new List<string> { "Beech Wood", "Beech wood / Nylon hair", "Cardboard / Wood / Plastic", "Cherry Wood", "Cherry wood", "Lotus Wood", "Lotus wood", "MDF", "Madera/Poliéster", "Mdf", "Natural Wood", "Nilotic Acacia Wood", "Nilotic acacia wood", "Paper/Wood", "Pine Wood", "Pine Wood / PE", "Pine wood", "Poplar wood", "Rosewood / Stainless steel", "Wood", "Wood / 304 stainless steel", "Wood / Cardboard", "Wood / Cotton", "Wood / Crayon", "Wood / Felt", "Wood / Metal / Magnet", "Wood / Paper / Paperboard", "Wood / Plastic", "Wood / Polyester", "Wood / Polyster", "Wood / Stainless Steel", "Wood with Antibacterial Varnish", "Wood/Metal", "Wood/Polyester", "Wood/Stainless Steel", "Wood/Wax Crayon" } },
+        };
+    else if (langCode == "pt")
+        materialGroups =         new Dictionary<string, List<string>>
+        {
+            { "ABS", new List<string> { "ABS / Aluminio", "ABS / Borracha", "ABS / Clipe Metálico", "ABS / Poliéster", "ABS / Silicone", "ABS/Alumínio", "ABS/alumínio", "Abs/Cartón", "Abs/Metal" } },
+            { "Algodão", new List<string> { "100% Algodão", "100% Algodón", "38% Algodão/ 40% Políester/ 22% Rayon", "85% Algodão / 15% Lurex", "90% Algodão / 10 % Poliéster", "Algodão", "Algodão / Algodão Reciclado", "Algodão / Aluminio", "Algodão / Jeans reciclado", "Algodão / Juta", "Algodão / Madeira", "Algodão / Meltblown", "Algodão / Metal", "Algodão / PE", "Algodão / Poliéster", "Algodão / Poliéster Reciclado", "Algodão / Poliéster reciclado", "Algodão / Spunbond", "Algodão / Veludo", "Algodão 100%", "Algodão 70% / Seaqual 30%", "Algodão 80% / Poliamida 16% / Elastano 4%", "Algodão 80% / Poliamida 18% / Elastano 2%", "Algodão 80% / Poliéster 20%", "Algodão Fair Trade", "Algodão Fairtrade", "Algodão Fairtrade  / Juta", "Algodão Laminado", "Algodão OEKO-TEX", "Algodão Orgánico", "Algodão Orgânico", "Algodão Orgânico / Algodão Reciclado", "Algodão Orgânico 100%", "Algodão Reciclado", "Algodão Reciclado / Juta", "Algodão Reciclado / Poliéster", "Algodão Reciclado / Poliéster Reciclado", "Algodão Reciclado Fairtrade", "Algodão Reciclado/Poliéster Reciclado", "Algodão antibacteriano", "Algodão aveludado", "Algodão canvas laminado", "Algodão escovado", "Algodão laminado / Juta laminada", "Algodão orgânico", "Algodão reciclado", "Algodão reciclado / Juta", "Algodão reciclado / Poliéster", "Algodão reciclado / Poliéster reciclado", "Algodão/PVC", "Algodão/Poliéster", "Algodão/Poliéster/PU", "Algodão/Sabão", "Algodón", "Algodón/Lurex", "Algodón/Metal", "Algodón/Peinado", "Bambú / Algodão / Linho", "Borracha / Algodão", "Canvas", "Canvas reciclado", "Cordão de Algodão / Metal", "Cubos: Mármore / Saco: Algodão", "Exterior Algodão reciclado / Interior non woven.", "Exterior: 60% Algodão, 40% Poliéster / Interior: Algodão", "Exterior: Algodão / Interior: Poliéster", "Jeans reciclado", "Lona Reciclada", "Lona laminada reciclada", "Lona reciclada", "Non woven Laminado PP", "Papel / Algodão", "Papel Kraft / Algodão", "Poliéster 10% / Algodão 90%", "Preto: Algodão / Natural: Algodão Juta", "Páreo: 80% Algodão; 20% Poliéster / Toalha: 100% Poliéster", "Tela", "Tela natural", "Tela natural reciclada", "Veludo / Algodão", "Veludo cotelê", "algodão 220 gr/m2 / Poliéster" } },
+            { "Alumínio", new List<string> { "ABS / Aluminio", "Aluminium / ABS", "Alumínio / ABS", "Alumínio / Bambu", "Alumínio com acabamento de borracha", "Alumínio/Cortiça" } },
+            { "Aço Inoxidável", new List<string> { "Acero Inoxidable/Plástico", "Aço Inoxidável / Borracha", "Aço Inoxidável / Madeira", "Aço Inoxidável 304 Interior / Exterior 201 / Bambu", "Aço Inoxidável 304 interior / Exterior 201 / Silicone / PP", "Aço Inoxidável 304 interior / Exterior 201 / Tampa de silicone e PP", "Aço Inoxidável/Cetim", "Aço Inoxidável/Madeira", "Aço Inoxidável/Nylon 300D", "Aço inox reciclado / PP", "Aço inoxidável / Bambu", "Aço inoxidável / PP", "Aço inoxidável / PP / Silicone", "Aço inoxidável / PU / Cartão", "Aço inoxidável 304 / PP / Silicone / Alumínio", "Aço inoxidável interior 304 / Exterior 201 / Bambu", "Int.aço inoxidável 304/Ext.201/PP", "Talheres: Aço Inox 304 / Saco: RPET 600D" } },
+            { "Bambu", new List<string> { "Bambu / Acrilico", "Bambu / Aço", "Bambu / Metal", "Bambu / Plástico acrílico", "Bambu / Poliéster", "Bambu / Poliéster / ABS / Acrílico", "Bambu / Silicone", "Bambu / Vidro / Polipropileno", "Bambú / ABS", "Bambú / Borracha / Metal", "Bambú / Metal / ABS", "Bambú / Metal / Borracha", "Bambú / Vidro / Couro Sintético", "Bambú/Incienso", "Bambú/Poliéster" } },
+            { "Bolsa", new List<string> { "Pounch/Alumínio" } },
+            { "Borosilicato", new List<string> { "Borosilicato / Cortiça" } },
+            { "Borracha", new List<string> { "Borracha", "Borracha / Plástico", "Caucho/Plástico" } },
+            { "Camurça", new List<string> { "Antelina", "Antelina/Pvc" } },
+            { "Canvas", new List<string> { "Lona / Poliéster / EVA" } },
+            { "Cartão", new List<string> { "Cartão", "Cartão / Madeira", "Cartão / Vidro", "Cartão/PVC" } },
+            { "Cavalete", new List<string> { "Cavalete / Pinturas de Cera" } },
+            { "Cera", new List<string> { "Cera" } },
+            { "Cera vegetal", new List<string> { "Cera vegetal / Fragrância / Vidro" } },
+            { "Cerâmica", new List<string> { "Ceramica/Parafina", "Cerámica", "Cerámica/Madera", "Cerâmica", "Cerâmica / Cortiça", "Cerâmica/Madeira", "Giz", "Grés", "Terracota" } },
+            { "Cetim", new List<string> { "Raso" } },
+            { "Chiffon", new List<string> { "Chiffon" } },
+            { "Cortiça", new List<string> { "Cortiça / ABS Reciclado", "Cortiça / Madeira / Silicone", "Cortiça / PU", "Cortiça / Papel", "Cortiça/Metal", "Cortiça/Polietileno" } },
+            { "Couro", new List<string> { "Courinho", "Couro Reciclado", "Couro de vaca", "Couro reciclado / Papel", "Pele", "Piel", "Polipiel" } },
+            { "Couro Nappa", new List<string> { "Piel Nappa" } },
+            { "Cristal", new List<string> { "Cristal / Parafina / Cera Vegetal", "Cristal/Madera", "Vidro / Bambu", "Vidro / Bambu / Cera Vegetal / Parafina 95% / Perfume 5%", "Vidro / Bambu / Cera Vegetal 80% / Parafina Refinada 15% / Perfume 5%", "Vidro / Bambu / Mikado Sticks", "Vidro / Bambu / Varas de rattan", "Vidro / PP / Aluminio", "Vidro / Parafina / Madeira", "Vidro / Plástico / Azeite", "Vidro / Plástico / Perfume", "Vidro / Tampa: Plástico Reciclado", "Vidro/Fragrância/DPM/Rattan" } },
+            { "Espuma", new List<string> { "Espuma / Plástico", "Espuma/Plástico" } },
+            { "Feltro", new List<string> { "Feltro", "Feltro / Non Woven" } },
+            { "Fibra de Bambu", new List<string> { "Fibra de bambu / PP" } },
+            { "Fibra de Trigo", new List<string> { "30% Fibra de trigo y 70% PP", "Fibra de Trigo / PP (Biodegradable)", "Fibra de trigo / PP / Cortiça", "Fibra de trigo y PP" } },
+            { "Lona reciclada", new List<string> { "Lona reciclada" } },
+            { "Madeira", new List<string> { "Cartão / Madeira / Plástico", "MDF", "Madeira", "Madeira / Algodão", "Madeira / Aço Inoxidável", "Madeira / Aço inoxidável 304", "Madeira / Cartão", "Madeira / Cera", "Madeira / Feltro", "Madeira / Metal / Imã", "Madeira / Papel / Cartão", "Madeira / Plástico", "Madeira / Poliéster", "Madeira com verniz antibacteriano", "Madeira de Cerejeira", "Madeira de Faia", "Madeira de Loto", "Madeira de Pinheiro", "Madeira de acácia nilótica", "Madeira de cerejeira", "Madeira de choupo", "Madeira de faia / pelo de nylon", "Madeira de jacarandá / Aço inoxidável", "Madeira de lótus", "Madeira de pinhal", "Madeira de pinho / PE", "Madeira natural", "Madeira/Lápis de Cera", "Madeira/Poliéster", "Madera", "Madera de Pino", "Madera/Acero Inoxidable", "Madera/Metal", "Madera/Plastico", "Mdf", "Pinho" } },
+            { "Metal", new List<string> { "Acero Inoxidable", "Acero Inoxidable/Raso", "Alloy", "Aluminio", "Aluminio reciclado", "Aluminio/Pu", "Alumínio", "Alumínio Reciclado", "Alumínio Reciclado / Bambu", "Alumínio Reciclado / Borracha / Grafite", "Alumínio reciclado", "Alumínio/Alloy", "Alumínio/Borracha", "Aço", "Aço Inox 304 interior / 201 exterior", "Aço Inoxidável", "Aço Inoxidável / Algodão", "Aço Inoxidável / Bambu", "Aço Inoxidável 201 exterior / Aço Inoxidável 304 interior", "Aço Inoxidável 304", "Aço Inoxidável 304 / Bambu", "Aço Inoxidável 304 Interior / Aço Inoxidável 201 exterior", "Aço Inoxidável 304 Interior / Exterior 201", "Aço Inoxidável Reciclado", "Aço Inoxidável reciclado 304", "Aço inox Reciclado", "Aço inoxidáve", "Aço inoxidável", "Aço inoxidável 304", "Aço inoxidável Reciclado 304", "Aço inoxidável reciclado 304 interior / Aço inoxidável reciclado 201 exterior", "Bambu / Metal / Ímã", "Cortiça / Metal", "Estaño", "Ferro", "Jade / Metal", "Latão", "Metal", "Metal / ABS", "Metal / Algodão", "Metal / Borracha", "Metal / Cartão", "Metal / Madeira", "Metal / PU", "Metal / PVC", "Metal / Parafina", "Metal / Pu", "Metal / Tela", "Metal / Vaselina", "Metal/Madeira", "Metal/Madera", "Metal/Plástico", "Metal/Sabão", "Nylon 170T / Metal", "PU / Metal", "PU / Metal / Cartão", "Pongee 190T / Aço Inoxidável / Fibra de Vidro", "Zinc" } },
+            { "Microfibra", new List<string> { "Microfibra" } },
+            { "Natural", new List<string> { "310 gr/m² tela laminada natural / juta laminada", "Algodão laminado / Juta laminada", "Bambu", "Bambu / ABS", "Bambu / Borracha / Grafite", "Bambu / Fibra de trigo", "Bambu / Papel", "Bambu / Plástico / Algodão", "Bambu / Poliéster RPET", "Bambu / Veludo", "Bambu/Cristal/Cera abelha e vegetal", "Bambú", "Bambú / ABS", "Bambú / Algodão", "Bambú / Fibra de Trigo / PP", "Bambú / Lixa", "Bambú / Silicone", "Bambú / Vidro", "Bambú/Silicone", "Cartão / Fibra de Trigo / PP", "Cartão / Incenso", "Cartão / Papel", "Cartão / Papel / Bambu", "Cartão Kraft", "Cartão caixas de leite", "Cartão caixas de leite / Bambu", "Cartón", "Cera vegetal / Parafina / Cortiça", "Cera vegetal / Parafina / Madeira", "Cera vegetal 80% / Parfina refinada 20%", "Cortiça", "Cortiça / Fibra de Trigo / PP", "Cortiça / Papel", "Couro", "Cânhamo", "Entrelaçamento de Algas", "Fibra de Trigo / PP", "Fibra de Trigo / PP (Antibacteriano)", "Fibra de Trigo 60% / PP 40%", "Fibra de coco / Polipropileno", "Fibra de coco / Polipropileno / Nylon", "Folha de milho", "Juta", "Juta / Algodão", "Juta / Interior PP laminado", "Juta / Lona Natural Laminada", "Juta Laminada", "Juta laminado / PP / Algodão / Alumínio", "Juta não laminada", "Juta/Algodão/Interior PP plastificado.Não contém PVC.", "Jute", "Konjac", "Loofah / Madeira", "Madeira de bambu / Poliéster", "Paja", "Palha", "Palha de Papel", "Palha flexível", "Papel", "Papel / Cartão", "Papel 80 gr", "Papel Ecológico", "Papel Kraft", "Papel Reciclado", "Papel de Ervas / Papel", "Papel de celulose 140 gr/m² com sementes de camomila, papoula, margarida e lavanda.", "Papel de celulose 140 gr/m² com sementes variadas de camomila, papoula, margarida, lavanda, hortelã ou centaurea.", "Papel de celulose 140 gr/m² com uma variedade de camomila, papoula, margarida, alfazema, vegetal ou centaurea.", "Papel de celulose 200 gr/m² com sementes de camomila, papoula, margarida e lavanda.", "Papel de celulose 200 gr/m² com sementes variadas de camomila, papoula, margarida, lavanda, hortelã ou centaurea.", "Papel de celulose 200 gr/m² com uma variedade de camomila, papoula, margarida, alfazema, vegetal ou centaurea.", "Papel de pulpa de madera de 140 gr/m² con semillas variadas de manzanilla, amapola, margarita, lavanda, hiervabuena o centaurea.", "Papel de pulpa de madera de 200 gr/m² con semillas variadas de manzanilla, amapola, margarita, lavanda, hiervabuena o centaurea.", "Papel kraft", "Papel/Lápis de Cera", "Parafina", "Pedra Jade", "Perla", "Poliolefinas / Madeira de faia", "Pérola", "Sabão", "Suco Laminado", "Syndopal Vegetal RSPO / 1% Jacinthe 722", "Vegetal Estd.", "Viscosa", "Yute" } },
+            { "Nylon", new List<string> { "840D Nylon", "Nylon", "Nylon / Cobre", "Nylon / Poliéster", "Nylon 1200D", "Nylon 230D / Poliester 800D", "Nylon 420D", "Nylon 50% / Poliéster 50%", "Náilon", "Woven Nylon 1200D", "Woven Nylon 210D" } },
+            { "Não Tecido", new List<string> { "Non Woven / Algodão laminado PET", "Non Woven / Álcool 75%", "Non Woven 80 gr", "Non Woven Laminado", "Non woven / Cera", "Non woven / Álcool 75%" } },
+            { "Outros", new List<string> { "Cartão/Reboco", "Cartão/Vidro" } },
+            { "PP", new List<string> { "PP / Aço inoxidável", "PP / Papel" } },
+            { "PU", new List<string> { "Caja: Pu, Bolígrafo y Roller: Metal", "Caja: Pu, Bolígrafo: Metal", "Caja: Pu, Roller: Metal", "Feltro RPET 2mm / PU", "PU / ABS / Alumínio", "PU / Aluminio reciclado / Cartón", "PU / Camurça", "PU / Metal", "PU / PEVA", "PU / Papel", "PU / Plástico", "PU / RPET", "Poliuretano/ Papel", "Pu/Papel" } },
+            { "PVC", new List<string> { "Caixa: PVC / Alumínio / Caneta Rollerball: Metal", "Caixa: Pvc/Alumínio, Esferográfica / Roller: Metal", "Caixa: Pvc/Alumínio, Esferográfica: Metal", "PVC / Alumínio", "PVC / Cobre", "PVC / Metal", "PVC / Parafina", "PVC / Poliéster", "PVC/Cobre", "PVC/Madeira", "PVC/Metal", "Pvc/Algodón", "Pvc/Cerámica" } },
+            { "Palha", new List<string> { "Paja/Poliester" } },
+            { "Papel", new List<string> { "Cartolina", "Papel / Cartão", "Papel / Madeira / Plástico", "Papel / Plástico", "Papel / Poliéster", "Papel / cartão", "Papel 210gr/m2", "Papel Plastificado", "Papel de Jornal Reciclado", "Papel de celulose 120 gr/m² com sementes variadas de camomila, papoula, margarida, lavanda, hortelã ou centaurea.", "Papel de celulose 120 gr/m² com uma variedade de camomila, papoula, margarida, alfazema, vegetal ou centaurea.", "Papel de celulose 200 gr/m² com sementes de camomila, papoula, margarida e lavanda.", "Papel laminado", "Papel plastificado", "Papel/Cartão", "Paper", "Pergamino", "cartão" } },
+            { "Papelão", new List<string> { "Cartão", "Cartão / Cortiça", "Cartão / Cortiça / PU", "Cartão / Fibra de Trigo / PP", "Cartão / Fibra de Trigo e PP", "Cartão / Frutas Papel / Papel", "Cartão / Imã", "Cartão / Metal", "Cartão / PU / Bambu", "Cartão / PU / Metal", "Cartão / Papel", "Cartão / Papel de pedra", "Cartão / RPET / Alumínio Reciclado", "Cartão de caixas de leite / Papel", "Cartón / Acero inoxidable reciclado / PU / Aluminio reciclado", "Cartón / Cartón de leche / Aluminio reciclado", "Cartón / PU / Acero inoxidable / Acero inoxidable reciclado", "Cartón / PU / Acero inoxidable reciclado / Bambú / Poliéster / Abs / Acrílico", "Cartón / PU Reciclado / Aluminio reciclado", "Cartón / Papel", "Cartón / RPET / Bambú / Aluminio reciclado", "Cartón/Chocolate", "Cartón/Cristal", "Cartón/Imantado", "Cartón/Incienso/Cerámica" } },
+            { "Parafina", new List<string> { "Parafina / Lata", "Parafina/Incienso" } },
+            { "Pedra", new List<string> { "Pedra/Aço Inoxidável" } },
+            { "Pele", new List<string> { "Pele/Metal" } },
+            { "Pele sintética", new List<string> { "Couro" } },
+            { "Plástico", new List<string> { "210 Rpet", "ABS", "ABS / EVA", "ABS / PU", "ABS / PVC", "ABS Reciclado", "ABS reciclado", "ABS/Polipiel", "ABS/Poliuretano", "ABS/Silicone", "AS", "Abs", "Abs/Ventosa", "Acrílico", "Acrílico 120gms / EPE / PP / RPET 600D", "Borracha", "Borracha EVA", "Caixa de leite", "Caixa: Plástico / Esferográfica: Metal", "Caucho", "EVA", "EVA/PVC", "Esponja / PE", "Eva", "Eva/Pvc", "Funda: Plástico, Bolígrafo: Metal", "Neoprene", "Non Woven", "Non woven", "PE", "PE espessura 0,025", "PETG", "PETG / PP", "POE / Poliéster", "PP", "PP / Fibra de Trigo / Silicone", "PP Woven", "PP laminado", "PU", "PU / ABS / PVC", "PU 210D", "PU 600D resistente a água", "PU 900D", "PU 900D impermeável", "PU 900D resistente a água", "PU reciclado", "PVC", "PVC / ABS", "PVC / Plástico", "PVC / Sabão", "Plastico / Alumínio", "Plástico", "Plástico (Polietileno)", "Plástico (tipo de plástico: PC)", "Plástico / Aço Inoxidável", "Plástico / Aço Inoxidável 201", "Plástico / Bambu", "Plástico / Cartão", "Plástico / Caucho", "Plástico / Cera", "Plástico / Cerâmica", "Plástico / Clipe Metal", "Plástico / Lítio", "Plástico / Metal", "Plástico / Non Woven Álcool 75%", "Plástico / Silicone", "Plástico AS", "Plástico Antibacteriano", "Plástico PP", "Plástico PS/PVC", "Plástico UV400", "Plástico/Acero Inoxidable", "Plástico/Aluminio", "Plástico/Antelina", "Plástico/Aço Inoxidável", "Plástico/Cartón", "Plástico/Clipe metal", "Plástico/Metal", "Plástico/Metal Clip", "Polietileno", "Polipropileno", "Polipropileno 50 microns", "Polipropileno Enviromental (BOPP+VMPET)", "Poliresina", "Polirresina", "Poliuretano", "Poliuretano (não PVC)", "Poliuretano Alta Qualidade", "Poliuretano/ABS/PVC", "Poliéster 500D / PU", "Polybag", "Pongee RPET / Fibra de vidro / EVA", "Pu", "Pu Alta Calidad", "Pu/Abs/PVC", "Pu/Plástico", "Pvc", "RPET", "RPET 300D", "RPET 300D / PU", "RPET Poliéster", "Rpet 210", "Rpet 600D", "Silicona", "Silicone", "Silicone / ABS", "Silicone / Abs", "Solução hidroalcoólica: 75% de álcool / Tampa: PP / Tubo: PS.", "TPE / NBR", "TPU", "TPU / ABS", "TPU(Poliuretano termoplástico)", "Tecido PP", "Teflón", "Tritán" } },
+            { "PoliAlgodão", new List<string> { "Polialgodão / Juta" } },
+            { "Polipropileno", new List<string> { "Polipropileno / Papel" } },
+            { "Poliuretano", new List<string> { "Poliuretano/Alumínio", "Poliuretano/Metal", "Poliuretano/Metal/Cartão", "Poliuretano/Vidro" } },
+            { "Poliéster", new List<string> { "30% Poliéster Reciclado 70% Poliéster", "300D Poliéster RPET / 900D PU resistente a água", "40% Poliester 60% Algodão", "65% Poliéster RPET / 35% algodão / PEVA", "80% Poliéster (RPET) / 20% Poliamida", "Algodão reciclado / Poliéster", "Alças: TPE / Saco: Poliéster RPET", "Cetim", "Charol/Poliéster", "Felpo Poliéster RP / 2mm.", "Feltro RPET", "Flanela de Poliéster", "Funda: Poliéster / Algodão / Enchimento: PVC", "Microfibra", "Microfibra / Não contém PVC", "Microfibra RPET 67% / Poliéster 33%", "Non Woven", "Non woven RPET", "Non woven reciclado", "Pega: TPE / Saco: Poliéster RPET", "Polar Antipiling", "Polar Antipilling", "Polar Antipilling 200gr/m2", "Polar Poliéster", "Poliester", "Poliester 420D 70% / RPET 30%", "Poliester 600 D", "Poliuretano / Poliéster", "Poliéster", "Poliéster / Algodão", "Poliéster / Alumínio", "Poliéster / Borracha", "Poliéster / Elastano", "Poliéster / Goma", "Poliéster / Madeira", "Poliéster / Metal", "Poliéster / Non woven", "Poliéster / Nylon", "Poliéster / PU", "Poliéster / Papel", "Poliéster / Pluma", "Poliéster / Polar", "Poliéster / Poliamida", "Poliéster / Woven", "Poliéster 1200D", "Poliéster 1680D", "Poliéster 170T", "Poliéster 200 gr", "Poliéster 200D", "Poliéster 210 D", "Poliéster 210D", "Poliéster 210D RPET", "Poliéster 210D/Polar", "Poliéster 280D", "Poliéster 300D", "Poliéster 300D / 50% RPET", "Poliéster 300D RPET", "Poliéster 420D", "Poliéster 420D / Nylon", "Poliéster 50% / Algodão 50%", "Poliéster 500D", "Poliéster 600D", "Poliéster 600D / Não contém PVC", "Poliéster 600D 3 tone", "Poliéster 600D RPET / Cartão / Papel", "Poliéster 600D Two Tone", "Poliéster 600D/Neopreno", "Poliéster 600d / Aço", "Poliéster 70% / Viscose 30%", "Poliéster 80% / 20% poliamida", "Poliéster 840D", "Poliéster Acolchoado", "Poliéster Impermeável", "Poliéster Jacquard", "Poliéster Jeans", "Poliéster Moss", "Poliéster Polar", "Poliéster Polar 180 gr/m2", "Poliéster RPET", "Poliéster RPET / ABS", "Poliéster RPET / Metal / Cartão", "Poliéster RPET 1200D", "Poliéster RPET 190T", "Poliéster RPET 300D", "Poliéster RPET 500D / PU", "Poliéster RPET 600D", "Poliéster Reflexiva", "Poliéster impermeável Poliéster 300D", "Poliéster polar", "Poliéster/Aluminio", "Poliéster/Madeira", "Poliéster/Madera", "Poliéster/Metal", "Poliéster/Pvc", "Polycanvas", "Pongee RPET", "Pongee Rpet", "RPET / Painel traseiro Poliester 420D", "RPET 1680D", "RPET 30% / Poliester 70%", "RPET Non woven", "RPET Polar / 600D RPET / PEVA", "RPET Poliéster 300D", "RPET Two Tone", "RPET de Poliéster 300D", "RPET non woven", "RPET não tecido", "Tecido / Madeira / Poliéster", "Tecido laminado", "Veludo Poliéster", "Veludo de Poliéster" } },
+            { "Pongee", new List<string> { "Pongee / Fibra de Vidro", "Pongee / Fibra de vidro", "Pongee 190T/Aço Galvanizado/ABS", "Pongee 190T/Aço Inoxidável/Fibra de Vidro", "Pongee RPET / Metal / Fibra de Vidro", "Pongee/Fibra de Vidro", "RPET Pongee / Metal / Fibra de vidro" } },
+            { "RPET", new List<string> { "Nylon RPET", "REPET 300D / Bambu", "RPET 300D 48% e Nylon", "RPET 600D / Alumínio / PEVA", "RPET Plástico / Aço Inoxidável" } },
+            { "Sabão", new List<string> { "Sabão" } },
+            { "Semente de Trigo", new List<string> { "Semente de Trigo / Lavanda natural / Algodão" } },
+            { "Silicone", new List<string> { "Silicone / Plástico / Metal" } },
+            { "Solução Hidroalcoólica", new List<string> { "Solução hidroalcoólica: 75% álcool" } },
+            { "Tecido", new List<string> { "Tecido / Metal", "Tecido Interlock / Esponja" } },
+            { "Tritan", new List<string> { "Tritán / Aço Inoxidável" } },
+            { "Têxtil", new List<string> { "Chiffon", "Rayón", "Veludo" } },
+            { "Veludo", new List<string> { "Terciopelo/Imitación Saten", "Veludo", "Veludo / Papel" } },
+            { "Verniz", new List<string> { "Charol" } },
+            { "Vidro", new List<string> { "Borosilicato / Bambu", "Cortiça / Vidro", "Cristal", "Pedra/vidro/óleo perfumado/caixa de cartão", "Vidro", "Vidro / Aço Inoxidável", "Vidro / Aço Inoxidável / Neoprene", "Vidro / Cartão", "Vidro / Cera", "Vidro / Cera / Fragrância", "Vidro / Madeira", "Vidro / Madeira / Silicone", "Vidro / Metal", "Vidro / Metal / Cera / Fragrância", "Vidro / Parafina", "Vidro Borossilicato / Aço Inoxidável", "Vidro/Madeira" } },
+            { "Vime", new List<string> { "Vime / Madeira / Aço inoxidável / Cerâmica / Plástico / PP / Espuma isolante", "Vime / Madeira / Aço inoxidável / Cerâmica / Plástico / PP / Poliéster" } },
+            { "Viscose", new List<string> { "Viscose" } },
+        };
+    else if (langCode == "ca")
+        materialGroups =         new Dictionary<string, List<string>>
+        {
+            { "38% Cotó", new List<string> { "38% Algodón/ 40% Poliéster/ 22% Rayon" } },
+            { "40% Polièster 60% Cotó", new List<string> { "40% Poliester 60% Algodón" } },
+            { "50% niló + 50% Polièster", new List<string> { "50% nylon + 50% poliéster" } },
+            { "70% Polièster 30% Viscosa", new List<string> { "70% Poliéster 30% Viscosa" } },
+            { "ABS", new List<string> { "ABS / Alumini", "ABS / Polièster", "ABS / Silicona", "ABS/Polipiel", "Abs / Cautxú", "Abs/Aluminio", "Abs/Cartón", "Abs/Clip Metal", "Abs/Metal", "Abs/Metall", "Abs/Pu", "Abs/Silicona" } },
+            { "Acer inoxidable", new List<string> { "Acer Inoxidable / Bambú", "Acer Inoxidable 304 Interior / 201 Exterior / Silicona / PP", "Acer Inoxidable Interior 304 / Exterior 201 / Bambú", "Acer Inoxidable Reciclat / PP", "Acer inoxidable / Fusta", "Acer inoxidable / PP", "Acer inoxidable / PP / Silicona", "Acer inoxidable / PU / Cartró", "Acer inoxidable /Fusta", "Acer inoxidable 304 / PP / Silicona / Alumini", "Acer inoxidable Interior 304 / Exterior 201 / Tapa de Silicona y PP", "Acer inoxidable/Fusta", "Acero Inoxidable /Madera", "Acero Inoxidable 304 interior / 201 Exterior / PP", "Acero Inoxidable/Goma", "Acero Inoxidable/Madera", "Acero Inoxidable/Nylon 300D", "Acero Inoxidable/Plástico", "Acero Inoxidable/Raso", "Coberts: Acer Inoxidable 304 / Bossa: 600D RPET" } },
+            { "Altres", new List<string> { "Jabón" } },
+            { "Alumini", new List<string> { "ABS i Alumini", "Alumini / ABS", "Alumini / Abs", "Alumini / Bambú", "Aluminio Acabado Caucho", "Aluminio/Caucho", "Aluminio/Corcho", "Aluminio/Pu" } },
+            { "Antelina", new List<string> { "Antelina/Pvc" } },
+            { "Bambú", new List<string> { "Bambu / Poliéster / ABS / Acrílico", "Bambú", "Bambú / ABS / Metall", "Bambú / Abs", "Bambú / Acero", "Bambú / Cristal / Cuero sintético", "Bambú / Cristal / Polipropilè", "Bambú / Metal", "Bambú / Metall", "Bambú / Metall / Abs", "Bambú / Plástic acrílic", "Bambú / Polièster", "Bambú / Silicona", "Bambú/Incienso", "Bambú/Poliéster", "Bambú/Silicona" } },
+            { "Borosilicat", new List<string> { "Borosilicato / Suro" } },
+            { "Bosses", new List<string> { "Pounch/Aluminio" } },
+            { "Caixa: PU", new List<string> { "Caja: Pu, Bolígrafo y Roller: Metal", "Caja: Pu, Bolígrafo: Metal", "Caja: Pu, Roller: Metal" } },
+            { "Caixa: PVC", new List<string> { "Caja: Pvc/Aluminio, Bolígrafo y Roller: Metal", "Caja: Pvc/Aluminio, Bolígrafo: Metal", "Caja: Pvc/Aluminio, Roller: Metal" } },
+            { "Caixa: Plàstic", new List<string> { "Caja: Plástico, Bolígrafo: Metal" } },
+            { "Cartró", new List<string> { "Cartró", "Cartró / Fibra de blat y PP", "Cartró / Imant", "Cartró / Metall", "Cartró / PU / Bambú", "Cartró / PU / Metall", "Cartró / Paper", "Cartró / Paper de fruites / Paper", "Cartró / Paper de pedra", "Cartró / Polièster", "Cartró / RPET / Alumini reciclat", "Cartró / Suro", "Cartró / Suro / PU / Bambú", "Cartró 1200gr/m2", "Cartró 350gr/m2", "Cartró 400 gr/m2", "Cartró provinent de brics de llet / Paper", "Cartró/Fibra de blat/PP", "Cartró/Paper", "Cartón", "Cartón / Acero inoxidable reciclado / PU / Aluminio reciclado", "Cartón / Cartón de leche / Aluminio reciclado", "Cartón / PU / Acero inoxidable / Acero inoxidable reciclado", "Cartón / PU / Acero inoxidable reciclado / Bambú / Poliéster / Abs / Acrílico", "Cartón / PU Reciclado / Aluminio reciclado", "Cartón / RPET / Bambú / Aluminio reciclado", "Cartón/Chocolate", "Cartón/Cristal", "Cartón/Escayola", "Cartón/Incienso/Cerámica", "Cartón/Madera", "Cartón/Papel", "Cartón/Pvc" } },
+            { "Cera vegetal", new List<string> { "Cera vegetal / Fragància / Vidre" } },
+            { "Ceràmica", new List<string> { "Ceramica/Parafina", "Ceràmica", "Ceràmica / Suro", "Cerámica", "Cerámica/Madera", "Gres", "Terracota", "Tiza" } },
+            { "Charol", new List<string> { "Charol/Poliéster" } },
+            { "Cotó", new List<string> { "100% Algodón", "100% Cotó", "100% Cotó 220 gr/m2", "100% Cotó Orgánico", "70 % Cotó + 30 % Seaqual", "80% Algodón / 20% Poliéster", "80% Cotó 20% Polièster", "80% Cotó, 18% Poliamida y 2% Elastà", "80% cotó, 16% poliamida 4% elastà", "85% Cotó / 15% Lurex", "90% algodón / 10 % poliéster", "Algodón", "Algodón / Metal", "Algodón / Poliéster", "Algodón 100%", "Algodón 140 gr/m2", "Algodón 140gr/m2", "Algodón 220gr/m2", "Algodón 220gr/m2 Laminado", "Algodón 230 gr/m2 laminado / Yute laminado", "Algodón 240gr/m2", "Algodón 275gr/m2", "Algodón Orgánico 100%", "Algodón Orgánico 100% 180gr/m2", "Algodón aterciopelado", "Algodón peinado", "Algodón/Jabón", "Algodón/Lurex", "Algodón/Metal", "Algodón/Peinado", "Algodón/Poliéster", "Algodón/Pvc", "Bambú / Cotó y Lino", "Canvas", "Canvas Laminat Reciclat", "Canvas Reciclat", "Canves", "Canves natural", "Canves natural reciclat", "Canves reciclat", "Cautxú / Cotó", "Cordó de cotó / Metall", "Cotó", "Cotó / Cotó Reciclat", "Cotó / Denim reciclat", "Cotó / Fusta", "Cotó / Jute", "Cotó / Meltblown", "Cotó / Polièster", "Cotó / Polièster / PU", "Cotó / Polièster Reciclat", "Cotó / Spunbond", "Cotó / Terciopelo", "Cotó 135 gr/m2", "Cotó 135gr/m2", "Cotó 140 gr/m2 / PE", "Cotó 140gr/m2", "Cotó 180gr/m2", "Cotó 220gr/m2", "Cotó 230gr/m2", "Cotó 230gr/m2 / Jute", "Cotó 230gr/m2 Laminat", "Cotó 230gr/m2 Laminat / Jute Laminat", "Cotó 280gr/m2", "Cotó Fair Trade", "Cotó Fairtrade", "Cotó Fairtrade 100%", "Cotó Fairtrade 140 gr/m2", "Cotó Fairtrade 280 gr/m2", "Cotó Fairtrade Reciclat", "Cotó Fairtrade de 140 gr/m²", "Cotó Fairtrade de 220 gr/m2  /  Yute 350 gr/m2", "Cotó OEKO-TEX", "Cotó Orgànic 105gr/m2", "Cotó Orgànic 230gr/m2", "Cotó Orgánic", "Cotó Reciclat", "Cotó Reciclat / Jute", "Cotó Reciclat / Polièster", "Cotó Reciclat / Polièster Reciclat", "Cotó Reciclat 100%", "Cotó Reciclat 140gr/m2", "Cotó Reciclat 220gr/m2", "Cotó antibacterià", "Cotó canvas laminat", "Cotó orgànic", "Cotó orgànic / Cotó Reciclat", "Cotó orgànic 280 gr/m2", "Cotó orgánico", "Cotó orgánico 140 gr/m2", "Cotó orgánico de 140 gr/m2", "Cotó peinado", "Cotó pentinat", "Cotó reciclado", "Cotó reciclat", "Cotó reciclat / Polièster", "Cotó reciclat / Polièster reciclat", "Cotó reciclat / Políester", "Cotó reciclat i Jute", "Cotó y Polièster", "Cotó/Polièster", "Denim reciclat", "Exterior 100% cotó reciclat 300 gr/m2  /  Interior 50gr non woven.", "Exterior: 60% Cotó, 40% Polièster / Interior: Cotó", "Exterior: Cotó / Interior: Polièster", "Galledes: Marbre / Bossa: Cotó", "Llavors de blat i Lavanda natural / teixit cotó 100%", "Negre: Cotó 280gr/m2 / Natural: Cotó Yute 180gr/m2", "Pana", "Paper / Cotó", "Paper kraft / Cotó", "Pareo: 80% Cotó y 20% Polyester / Toalla: 100% Polyester", "Polièster 10% / Cotó 90%", "Vellut / Cotó", "cotó 220 gr/m2 / Polièster" } },
+            { "Cristall", new List<string> { "Cristal / Acero inoxidable", "Cristal / Bambú / Cera Vegetal / Parafina 95% / Perfume 5%", "Cristal / Bambú / Varillas de ratán", "Cristal / Cartón", "Cristal/Madera", "Cristal/Parafina", "Cristal/Parafina/Madera", "Cristall", "Cristall / Bambú", "Cristall / Fragància / DPM / Ratan", "Cristall / Metall", "Cristall / Plàstic / Oli", "Cristall / Plàstic / Perfum", "Cristall / Tap: Plastic Reciclat", "Cristall/Parafina/Zera Vegetal", "Vidre / Bambú / Cera Vegetal 80% / Parafina Refinada 15% / Perfum 5%" } },
+            { "Cuir", new List<string> { "Charol", "Cuero reciclado / Paper", "Cuir Reciclat", "Pell de vaca" } },
+            { "Cànem", new List<string> { "Mimbre / Fusta / Acer inoxidable / Ceràmica / Plàstic / PP / Espuma aislante", "Mimbre / Fusta / Acer inoxidable / Ceràmica / Plàstic / PP / Polièster" } },
+            { "EVA", new List<string> { "Eva/Pvc" } },
+            { "Escuma", new List<string> { "Espuma/Plástico" } },
+            { "Feltre", new List<string> { "Feltre", "Feltre / Non Woven" } },
+            { "Fibra de bambú", new List<string> { "Fibra de Bambú / PP" } },
+            { "Fibra de blat", new List<string> { "30% Fibra de trigo y 70% PP", "Fibra de Blat / PP (biodegradable)", "Fibra de Blat / Pp (biodegradable)", "Fibra de Blat 60% PP 40%", "Fibra de Trigo / Pp (biodegradable)", "Fibra de trigo y PP", "Fibra de trigo y pp / Corcho" } },
+            { "Fusta", new List<string> { "Cartró / Fusta / Plástic", "Fusta", "Fusta / Acer inoxidable 304", "Fusta / Cartró", "Fusta / Cotó", "Fusta / Plàstic", "Fusta / Polièster", "Fusta amb Vernís Antibacterià", "Fusta d'Acacia Nilotica", "Fusta de Cirerer", "Fusta de Haia", "Fusta de Lotus", "Fusta de Pi", "Fusta de acacia nilotica", "Fusta de cerezo", "Fusta de haya / Pelo de nylon", "Fusta de palissandre / Acer inoxidable", "Fusta de pi", "Fusta de pi / PE", "Fusta de pino", "Fusta natural", "Fusta, Metal i Imant", "Fusta/Acer inoxidable", "Fusta/Cera", "Fusta/Polièster", "MDF", "Madera", "Madera / Papel / Cartón", "Madera / Poliéster", "Madera de Pino", "Madera de chopo", "Madera/Acero Inoxidable", "Madera/Fieltro", "Madera/Metal", "Madera/Pinturas de Cera", "Madera/Plastico", "Madera/Poliéster", "Mdf" } },
+            { "Goma", new List<string> { "Goma/Plástico" } },
+            { "Jutó", new List<string> { "Juco/Jute/Algodón/Interior PP plastificado.No contiene Pvc", "Jute / Algodón" } },
+            { "Llenç", new List<string> { "Canvas/Metal", "Lienzo/Pinturas de Cera", "Teixit / Polièster / EVA" } },
+            { "Llenç laminat", new List<string> { "Canvas laminado" } },
+            { "Lona reciclada", new List<string> { "Lona reciclada" } },
+            { "Metal", new List<string> { "Acer Inoxidable", "Acer Inoxidable / Bambú", "Acer Inoxidable 201 exterior i 304 interior", "Acer Inoxidable 304", "Acer Inoxidable 304 / Bambú", "Acer Inoxidable 304 Interior / 201 Exterior", "Acer Inoxidable Interior 304 / Exterior 201", "Acer Inoxidable Reciclat", "Acer Inoxidable Reciclat 304", "Acer Inoxidable reciclat 304", "Acer Inoxidable304", "Acer inoxidable", "Acer inoxidable 304", "Acer inoxidable Interior 304 / Exterior 201", "Acer inoxidable reciclat 304 a l'interior / acer inoxidable reciclat 201 exterior", "Acero", "Acero Inoxidable", "Acero Inoxidable / Algodón", "Acero Inoxidable 304", "Alloy", "Alumini", "Alumini Reciclat", "Alumini Reciclat / Bambú", "Alumini reciclat", "Aluminio", "Aluminio Alloy", "Aluminio reciclado", "Bambú / Metall / Imant", "Estany", "Ferro", "Jade i Metal", "Latón", "METAL", "Metal", "Metal / Cotó", "Metal/Cartón", "Metal/Fusta", "Metal/Jabón", "Metal/Madera", "Metal/Parafina", "Metal/Plástico", "Metal/Pu", "Metal/Pvc", "Metall", "Metall / Abs", "Metall / Pu", "Metall / Suro", "Metall / Tela", "Metall / Vaselina", "PU / Metall", "Polièster", "Pongee 190T / Acer Inoxidable / Fibra de Vidre", "Pu/Aluminio", "Pu/Metall/Cartró", "Suro / Metal", "Zinc" } },
+            { "Microfibre", new List<string> { "Microfibra" } },
+            { "Natural", new List<string> { "100% Jute", "100% bambú", "80% cera vegetal / 20% parfina refinada", "Bambú", "Bambú +ABS", "Bambú / Abs", "Bambú / Cotó", "Bambú / Fibra de blat", "Bambú / Fibra de blat y PP", "Bambú / Goma / Grafit", "Bambú / Paper", "Bambú / Paper de vidre", "Bambú / Plàstic / Cotó", "Bambú / Polièster RPET", "Bambú / Vellut", "Bambú / Vidre / Cera d'abella / Cera vegetal", "Bambú i Vidre", "Bambú y ABS", "Cartró / Paper / Bambú", "Cartró Kraft", "Cartró provinent de brics de llet", "Cartró/ Fibra de blat y PP", "Cartró/Paper", "Cartón/Imantado", "Cartón/Papel", "Cera vegetal/Parafina/Fusta", "Cera vegetal/Parafina/Suro", "Corcho", "Cànem", "Entreteixit d'Algues", "Fibra de Blat i PP (Antibacterià)", "Fibra de Blat/PP", "Fibra de blat y PP", "Fibra de coco / Polipropilè", "Fibra de coco / Polipropilè / Nylon", "Fulla de blat de moro", "Fusta de bambú / Polièster", "Incens", "Juco Laminat", "Jute", "Jute / Cotó", "Jute Natural Laminat / Canves", "Jute laminat", "Jute/Interior PP laminado.No contiene Pvc", "Jute/No contiene Pvc", "Konjac", "Lona laminada natural  / Yute Laminat", "Loofah i Fusta", "Paja", "Paja Flexible", "Paja de Papel", "Paja flexible", "Palla", "Papel", "Paper", "Paper 90gr/m2", "Paper Ecològic", "Paper Kraft", "Paper Kraft 100 gr/m2", "Paper Reciclat", "Paper d'herbes / Paper", "Paper de polpa de fusta amb llavors de camamilla, rosella, margarida i espígol.", "Paper de polpa de fusta amb llavors variades de camamilla, rosella, margarida, espígol, hiervabuena o centaurea.", "Paper de pulpa de Fusta de 140 gr/m² con semillas variadas de manzanilla, amapola, margarita, lavanda, hiervabuena o centaurea.", "Paper de pulpa de Fusta de 200 gr/m² con semillas variadas de manzanilla, amapola, margarita, lavanda, hiervabuena o centaurea.", "Paper kraft", "Pedra Jade", "Poliolefinas / Fusta de haya", "SYNDOPAL VEGETAL RSP", "Suro", "Suro / Fibra de blat y PP", "Syndopal Vegetal RSPO / 1% Jacinthe 722", "Vegetal Estd.", "Yute", "Yute Laminat / PP / Cotó de 320gr / Alumini", "Yute no Laminat" } },
+            { "Niló", new List<string> { "1200 Nylon", "1200D Woven Nylon", "420 Nylon", "840D Nylon", "Niló", "Niló / Polièster", "Nylon", "Nylon / Cobre", "Nylon 210 Woven", "Nylon 230D/Poliester 800D" } },
+            { "No teixit", new List<string> { "Non Woven / 75% alcohol", "Non Woven 80 gr", "Non Woven 80gr/m2", "Non Woven Laminado", "Non Woven y Algodón con laminado PET", "Non woven 70gr/m2/Cera", "Non woven Laminado PP" } },
+            { "PP", new List<string> { "PP / Paper", "PP / acer Inoxidable" } },
+            { "PU", new List<string> { "Feltre Polièster RPET 2mm y nanses en PU", "PU / Aluminio reciclado / Cartón", "PU / PEVA", "PU / Paper", "PU / Plàstic", "PU / RPET", "Poliuretà/ Paper", "Pu / Metal", "Pu/Abs/Alumini", "Pu/Abs/PVC", "Pu/Abs/Pvc", "Pu/Cristal", "Pu/Metal", "Pu/Metal/Cartón", "Pu/Papel", "Pu/Paper", "Pu/Suede" } },
+            { "PVC", new List<string> { "PVC / Polièster", "PVC/ Metal", "PVC/Cobre", "Pvc/ Metal", "Pvc/Algodón", "Pvc/Aluminio", "Pvc/Cerámica", "Pvc/Cobre", "Pvc/Jabón", "Pvc/Madera", "Pvc/Poliéster" } },
+            { "Palla", new List<string> { "Paja/Poliester" } },
+            { "Paper", new List<string> { "Cartón / Papel", "Papel 210gr/m2", "Papel 80 gr", "Papel/ Plástico", "Papel/Cartón", "Papel/Pintura de Cera", "Paper", "Paper / Carton", "Paper / Cartró", "Paper / Fusta / Plàstic", "Paper / Polièster", "Paper de Periódico Reciclado", "Pergamino" } },
+            { "Paper plastificat", new List<string> { "Papel plastificado", "Paper plastificat" } },
+            { "Papereria", new List<string> { "Carton", "Papel/Cartón" } },
+            { "Parafina", new List<string> { "Parafina / Llauna", "Parafina/Incienso" } },
+            { "Pedra", new List<string> { "Piedra/Acero Inoxidable" } },
+            { "Pell", new List<string> { "Piel", "Piel Nappa", "Piel/Metal" } },
+            { "Pell sintètica", new List<string> { "Pell" } },
+            { "Perla", new List<string> { "Perla" } },
+            { "Plàstic", new List<string> { "300D RPET/PU", "600D PU Resistent a l'aigua", "900D PU Resistent a l'aigua", "ABS", "ABS Reciclat", "ABS reciclat", "ABS/EVA", "ABS/PVC", "AS", "Abs", "Abs/Pu", "Abs/Ventosa", "Acrílic", "Acrílic 120gms / EPE / PP / RPET 600D", "Acrílico", "Antelina", "Cartró de brics de llet", "Cartulina", "Caucho", "Caucho/Plástico", "Cera", "EVA", "Esponja / PE", "Eva", "Feltre Polièster 100% RPET de 3mm", "Funda: Plástico, Bolígrafo: Metal", "Goma", "Goma Eva", "Neopreno", "Non Woven", "Non woven / Alcohol 75%", "Non woven 70gr/m2", "PE", "PE gruix 0,025", "PETG", "PETG / PP", "POE / Polièster", "PP", "PP / Fibra de Blat / Silicona", "PP Laminat", "PP woven", "PU", "PU 210D", "PU 900D", "PU 900D Impermeable", "PU reciclat", "PVC", "PVC / ABS", "Parafina", "Plàstic", "Plàstic  / Non Woven Alcohol 75%", "Plàstic / Bambú", "Plàstic / Liti", "Plàstic Antibacterià", "Plástic", "Plástic UV400", "Plástic/Silicona", "Plástico", "Plástico (polietileno)", "Plástico (tipo de plástico: PC)", "Plástico / Cerámica", "Plástico AS", "Plástico PP", "Plástico PS/PVC", "Plástico UV400", "Plástico/Acero Inoxidable", "Plástico/Acero inoxidable", "Plástico/Aluminio", "Plástico/Antelina", "Plástico/Cartón", "Plástico/Caucho", "Plástico/Cera", "Plástico/Clip Metal", "Plástico/Clip metal", "Plástico/Metal", "Plástico/Metal Clip", "Polietileno", "Polipiel", "Polipropileno", "Polipropilè", "Polipropilè 50 micras", "Polipropilè Enviromental (BOPP+VMPET)", "Poliresina", "Polirresina", "Poliuretà", "Pongee RPET / Fibra de Vidre / EVA", "Pu", "Pu (no PVC)", "Pu Alta Calidad", "Pu/Plástico", "Pvc", "Pvc / Plàstic", "Pvc/Parafina", "RPET", "RPET 300D", "RPET Polièster", "Rpet 210", "Rpet 600D", "Silicona", "Silicona / ABS", "Silicone / ABS", "Solució hidroalcohòlica 75% alcohol. Tapa PP i tub PS", "TPE/NBR", "TPU / ABS", "TPU(Poliuretano termoplástico)", "Teflón", "Tpu", "Tritán", "non woven 12 gr/m2", "non woven 25 gr/m2", "non woven 40gr/m2" } },
+            { "Policotó", new List<string> { "Policotó / Jute" } },
+            { "Polipell", new List<string> { "Polipell" } },
+            { "Polipropilè", new List<string> { "PP Woven", "Polipropilè/Paper" } },
+            { "Polièster", new List<string> { "100% Fibres de Polièster", "100% Polièster", "100% Pongee RPET", "100% RPET / Panell posterior 420D Polièster", "110 gr Non Woven RPET", "30% Polièster Reciclat 70% Polièster", "30% RPET i 70% Polièster", "300D Polièster 50% RPET", "300D Polièster RPET", "300D Polièster RPET / 900D PU Resistent a l'aigua", "50% Polièster / 50% Cotó", "600D Polièster RPET", "65% Polièster RPET / 35% Cotó / PEVA", "80% Polièster (RPET) / 20% Poliamida", "80% poliéster 200 gr/m2 / 20% poliamida", "Banda: TPE / Bossa: Polièster RPET", "Bandes: TPE / Borsa: Polièster RPET", "Cotó reciclat / Políester", "Feltre Polièster 100% RPET 2mm.", "Feltre Polièster RPET", "Feltre RPET", "Franel·la de Polièster", "Funda: Polièster / Cotó / Farcit: PVC", "Microfibra", "Microfibra RPET 67%  Polièster 33%", "Microfibra RPET 67% Polièster 33%", "Microfibra RPET 67% Poliéster 33%", "Microfibra/No contiene Pvc", "Non Woven RPET", "Non woven reciclat", "Nonwoven RPET", "Pana de Polièster", "Polar Antipiling", "Polar Antipilling", "Polar Antipilling 200gr/m2", "Polar RPET / 600D RPET / PEVA", "Polar RPET / PEVA / RPET 600D", "Poliester", "Poliester 420D 70% / RPET 30%", "Poliester 600 D", "Poliuretà / Polièster", "Polièster", "Polièster / Acer", "Polièster / Cautxú", "Polièster / Cotó", "Polièster / Fusta", "Polièster / Goma", "Polièster / Niló", "Polièster / Non woven", "Polièster / PU", "Polièster / Pluma", "Polièster / Poliamida", "Polièster / Pu", "Polièster / elastà", "Polièster / poliamida", "Polièster 200D", "Polièster 210D", "Polièster 210D RPET", "Polièster 280D", "Polièster 300D", "Polièster 300D / 50% RPET", "Polièster 300D RPET", "Polièster 500D", "Polièster 500D / PU", "Polièster Encoixinat", "Polièster Impermeable", "Polièster Jeans", "Polièster Polar", "Polièster RPET", "Polièster RPET / ABS", "Polièster RPET / Cartró / Paper", "Polièster RPET / Metall / Cartró", "Polièster RPET 1200D", "Polièster RPET 1680D", "Polièster RPET 190T", "Polièster RPET 300D", "Polièster Two Tone", "Polièster impermeable. Polièster 300D", "Polièster polar", "Polièster/Polar", "Polièster/Pu", "Polièster/Woven", "Poliéseter 190T/Pvc", "Poliéster", "Poliéster 1200D", "Poliéster 1680D", "Poliéster 170T", "Poliéster 190T", "Poliéster 190T Reflectante", "Poliéster 190T/Aluminio", "Poliéster 190T/Madera", "Poliéster 190T/Metal", "Poliéster 190T/Pvc", "Poliéster 200 gr", "Poliéster 200gr/m2", "Poliéster 210 D", "Poliéster 210D", "Poliéster 210D/Polar", "Poliéster 300D", "Poliéster 420D", "Poliéster 420D / Nylon", "Poliéster 500D", "Poliéster 600 D", "Poliéster 600D", "Poliéster 600D 3 tone", "Poliéster 600D/Neopreno", "Poliéster 600D/No contiene Pvc", "Poliéster 600D/Papel", "Poliéster 840D", "Poliéster Jacquard", "Poliéster Moss", "Poliéster Polar", "Poliéster Polar 180 gr/m2", "Poliéster RPET", "Poliéster/Aluminio", "Poliéster/Papel", "Polycanvas", "Políester", "Políéster", "Pongee RPET", "RPET 30% / Polièster 70%", "RPET Two Tone", "Satén", "Setí", "Vellut de Polièster" } },
+            { "Pongee", new List<string> { "Pongee / Fibra de Vidre", "Pongee 190T / Acer Galvanitzat / ABS", "Pongee 190T / Acer Inoxidable / Fibra de Vidre", "Pongee RPET / Metall / Fibra de Vidre", "Pongee Rpet / Metall / Fibra De Vidre", "Pongee/Fibra de Vidre", "Pongee/Fibra de Vidrio" } },
+            { "RPET", new List<string> { "600D RPET / Alumini / PEVA", "Plástic RPET / Acer inoxidable", "RPET 300D", "RPET 300D 48% i Naylon", "RPET Nailon" } },
+            { "Sabó", new List<string> { "Sabó" } },
+            { "Sedós", new List<string> { "Raso" } },
+            { "Silicona", new List<string> { "Silicona / Plàstic / Metall" } },
+            { "Solució hidroalcohòlica", new List<string> { "Solució hidroalcohòlica 75% alcohol" } },
+            { "Suro", new List<string> { "Corcho/Metal", "Corcho/Papel", "Corcho/Pu", "Suro / ABS Reciclat", "Suro / Fusta / Silicona", "Suro / PU", "Suro / Paper" } },
+            { "Teixit", new List<string> { "Teixit Interlock / Esponja", "Teixit interlock / Esponja" } },
+            { "Tritan", new List<string> { "Tritan / Acero Inoxidable" } },
+            { "Tèxtil", new List<string> { "Chiffon", "Rayón", "Vellut", "Viscosa" } },
+            { "Vellut", new List<string> { "Terciopelo/Imitación Saten", "Vellut", "Vellut / Paper" } },
+            { "Vidre", new List<string> { "Borosilicat / bambú", "Borosilicato / Bambú", "Borosilicato i Bambu", "Cristal", "Cristal / Acer inoxidable", "Cristal / Fusta / Silicona", "Cristal / Parafina", "Cristal/Parafina", "Cristall / Cera", "Glasspack", "Piedra / Vidrio / Aceite de fragancia / Caja de Cartró", "Suro / Vidre", "Vidre", "Vidre / Acer Inoxidable / Neoprè", "Vidre / Cera / Fragància", "Vidre / Fusta", "Vidre / Metall / Cera / Fragància", "Vidre Borosilicat / Acer Inoxidable", "Vidre i Bambu", "Vidre/Acer inoxidable" } },
+            { "Viscosa", new List<string> { "Viscosa" } },
+            { "Xifó", new List<string> { "Chiffon" } },
+        };
+    else
+        materialGroups =         new Dictionary<string, List<string>>
+        {
+            { "ABS", new List<string> { "ABS / Aluminio", "ABS / Caucho", "ABS / Poliéster", "ABS / Silicona" } },
+            { "Acero Inoxidable", new List<string> { "Acero Inoxidable  / PU / Cartón", "Acero Inoxidable / Bambú", "Acero Inoxidable / Madera", "Acero Inoxidable 304 Interior / 201 Exterior / Silicona / PP", "Acero Inoxidable 304 int./201 Ext./PP", "Acero Inoxidable Interior 304 / Exterior 201 / Bambú", "Acero Inoxidable Interior 304 / Exterior 201 / Tapa de Silicona y PP", "Acero Inoxidable Reciclado / PP", "Acero inoxidable / PP", "Acero inoxidable / PP / Silicona", "Acero inoxidable 304 / PP/ Silicona / Aluminio", "Cubiertos: Acero Inoxidable 304 / Bolsa: 600D RPET" } },
+            { "Algodón", new List<string> { "85% Algodón / 15% Lurex", "Algodón", "Algodón / Algodón Reciclado", "Algodón / Denim Reciclado", "Algodón / Madera", "Algodón / Metal", "Algodón / PE", "Algodón / Poliéster", "Algodón / Poliéster / PU", "Algodón / Poliéster Reciclado", "Algodón / Terciopelo", "Algodón / Yute", "Algodón 70% / Seaqual 30%", "Algodón 80% / Poliamida 16% / Elastano 4%", "Algodón 80% / Poliamida 18% / Elastano 2%", "Algodón 80% / Poliéster 20%", "Algodón Canvas Laminado", "Algodón Fairtrade", "Algodón Fairtrade  / Yute", "Algodón Fairtrade Reciclado", "Algodón Laminado", "Algodón Laminado / Yute laminado", "Algodón OEKO-TEX", "Algodón Orgánico", "Algodón Orgánico / Algodón Reciclado", "Algodón Peinado", "Algodón Reciclado", "Algodón Reciclado / Poliéster", "Algodón Reciclado / Poliéster Reciclado", "Algodón Reciclado / Yute", "Algodón reciclado", "Algodón reciclado / Poliéster", "Algodón reciclado / Poliéster reciclado", "Bambú / Algodón / Lino", "Canvas", "Canvas Laminado Reciclado", "Canvas Natural", "Canvas Natural Reciclado", "Canvas Reciclado", "Canvas reciclado", "Caucho / Algodón", "Cordón de Algodón / Metal", "Cubos: Mármol / Bolsa: Algodón", "Denim reciclado", "Exterior Algodón Reciclado / Interior Non Woven.", "Exterior: 60% Algodón, 40% Poliéster / Interior: Algodón", "Exterior: Algodón / Interior: Poliéster", "Negro: Algodón / Natural: Algodón yute", "Pana", "Papel / Algodón", "Papel kraft / Algodón", "Pareo: 80% Algodón y 20% Poliéster / Toalla: 100% Poliéster", "Poliéster 10% / Algodón 90%", "Terciopelo / Algodón" } },
+            { "Aluminio", new List<string> { "ABS / Aluminio", "Aluminio / ABS", "Aluminio / Bambú", "Aluminio Acabado Caucho" } },
+            { "Bambú", new List<string> { "Bambú / Acero", "Bambú / Acrílico", "Bambú / Cristal / Cuero sintético", "Bambú / Cristal / Polipropileno", "Bambú / Metal", "Bambú / Metal / ABS", "Bambú / Metal /Caucho", "Bambú / Plástico acrílico", "Bambú / Poliéster", "Bambú / Silicona", "Bambú/Poliéster/ABS/Acrílico" } },
+            { "Borosilicato", new List<string> { "Borosilicato / Corcho" } },
+            { "Canvas", new List<string> { "Canvas / Poliester / EVA" } },
+            { "Cartón", new List<string> { "Cartón", "Cartón / Acero inoxidable reciclado / PU / Aluminio reciclado", "Cartón / Cartón de leche / Aluminio reciclado", "Cartón / Corcho", "Cartón / Corcho / PU", "Cartón / Fibra de Trigo / PP", "Cartón / Imán", "Cartón / Metal", "Cartón / PU / Acero inoxidable / Acero inoxidable reciclado", "Cartón / PU / Acero inoxidable reciclado / Bambú / Poliéster / Abs / Acrílico", "Cartón / PU / Bambú", "Cartón / PU / Metal", "Cartón / PU Reciclado / Aluminio reciclado", "Cartón / Papel", "Cartón / Papel de frutas / Papel", "Cartón / Papel de piedra", "Cartón / RPET / Aluminio reciclado", "Cartón / RPET / Bambú / Aluminio reciclado", "Cartón proveniente de bricks de leche / Papel" } },
+            { "Cera vegetal", new List<string> { "Cera vegetal / Fragancia / Cristal" } },
+            { "Cerámica", new List<string> { "Cerámica", "Cerámica / Corcho", "Gres", "Terracota", "Tiza" } },
+            { "Corcho", new List<string> { "Corcho / ABS Reciclado", "Corcho / Madera / Silicona", "Corcho / PU", "Corcho / Papel" } },
+            { "Cristal", new List<string> { "Cristal / Bambú", "Cristal / Bambú / Cera Vegetal / Parafina 95% / Perfume 5%", "Cristal / Bambú / Cera Vegetal 80% / Parafina refinada 15% / Perfume 5%", "Cristal / Bambú / Varillas de ratán", "Cristal / PP / Aluminio", "Cristal / Parafina / Madera", "Cristal / Plástico / Aceite", "Cristal / Plástico / Perfume", "Cristal / Tapón: Plastico Reciclado", "Cristal/Fragancia/DPM/Ratán", "Cristal/Parafina/Cera Vegetal" } },
+            { "Cuero", new List<string> { "Cuero Reciclado", "Cuero de vaca", "Cuero reciclado / Papel" } },
+            { "Fieltro", new List<string> { "Fieltro / Non Woven" } },
+            { "Goma", new List<string> { "Goma / Plástico" } },
+            { "Jabón", new List<string> { "Jabón" } },
+            { "Lona reciclada", new List<string> { "Lona reciclada" } },
+            { "Madera", new List<string> { "Cartón / Madera / Plástico", "MDF", "Madera", "Madera  / Poliéster", "Madera / Acero Inoxidable", "Madera / Acero inoxidable 304", "Madera / Algodón", "Madera / Cartón", "Madera / Metal / Imán", "Madera / Papel / Cartón", "Madera / Plástico", "Madera / Poliéster", "Madera Natural", "Madera con Barniz Antibacteriano", "Madera de Acacia Nilotica", "Madera de Cerezo", "Madera de Chopo", "Madera de Haya", "Madera de Haya / Pelo de Nylon", "Madera de Loto", "Madera de Lotus", "Madera de Pino", "Madera de Pino / PE", "Madera palo de rosa / Acero Inoxidable" } },
+            { "Metal", new List<string> { "Acero Inoxidable", "Acero Inoxidable / Algodón", "Acero Inoxidable 201 Exterior / Acero Inoxidable 304 Interior", "Acero Inoxidable 304", "Acero Inoxidable 304 / Bambú", "Acero Inoxidable 304 Interior / 201 Exterior", "Acero Inoxidable Interior 304 / Exterior 201", "Acero Inoxidable Reciclado", "Acero Inoxidable Reciclado 304", "Acero Inoxidable Reciclado 304 Interior / 201 Exterior", "Acero Inoxidable reciclado 304", "Acero inoxidable", "Aluminio", "Aluminio Reciclado", "Aluminio Reciclado / Bambú", "Aluminio Reciclado / Goma / Grafito", "Aluminio reciclado", "Bambú / Metal / Imán", "Corcho / Metal", "Estaño", "Hierro", "Jade / Metal", "Metal", "Metal / ABS", "Metal / Algodón", "Metal / Caucho", "Metal / PU", "Metal / Vaselina", "Nailon 170T / Metal", "PU / Metal", "PU / Metal / Cartón", "Pongee 190T / Acero Inoxidable / Fibra de Vidrio", "Zinc" } },
+            { "Mimbre", new List<string> { "Mimbre / Madera / Acero Inoxidable / Cerámica / Plástico / PP / Espuma aislante", "Mimbre / Madera / Acero Inoxidable / Cerámica / Plástico / PP / Poliéster" } },
+            { "Nailon", new List<string> { "Nailon / Poliéster" } },
+            { "Natural", new List<string> { "Bambú", "Bambú / ABS", "Bambú / Algodón", "Bambú / Cristal", "Bambú / Fibra de trigo", "Bambú / Fibra de trigo / PP", "Bambú / Goma / Grafito", "Bambú / Papel", "Bambú / Papel de lija", "Bambú / Plástico / Algodón", "Bambú / Poliéster RPET", "Bambú / Terciopelo", "Bambú/Cristal/Cera de abeja y vegetal", "CARTÓN(DE PINO)", "Cartón / Fibra de trigo / PP", "Cartón / Incienso", "Cartón / Papel / Bambú", "Cartón Kraft", "Cartón bricks de leche / Bambú", "Cartón proveniente de bricks de leche", "Cera vegetal 80% / Parafina refinada 20%", "Cera vegetal/Parafina/Corcho", "Cera vegetal/Parafina/Madera", "Corcho", "Corcho / Fibra de trigo / PP", "Cáñamo", "Entretejido de Algas", "Entretejido de algas", "Fibra de Trigo / PP", "Fibra de Trigo / PP (Antibacteriano)", "Fibra de coco / Polipropileno", "Fibra de coco / Polipropileno / Nailon", "Fibra de trigo / PP", "Hoja de maíz", "Juco Laminado", "Konjac", "Lona laminada natural  / Yute laminado", "Loofah / Madera", "Madera de Bambú / Poliéster", "Paja", "Paja Flexible", "Paja de Papel", "Papel", "Papel Ecológico", "Papel Kraft", "Papel Reciclado", "Papel de Hierbas / Papel", "Papel de pulpa de madera de 140 gr/m² con semillas de manzanilla, amapola, margarita y lavanda.", "Papel de pulpa de madera de 140 gr/m² con semillas variadas de manzanilla, amapola, margarita, lavanda, hierbabuena o centaurea.", "Papel de pulpa de madera de 200 gr/m² con semillas de manzanilla, amapola, margarita y lavanda.", "Papel de pulpa de madera de 200 gr/m² con semillas variadas de manzanilla, amapola, margarita, lavanda, hierbabuena o centaurea.", "Papel kraft", "Piedra Jade", "Poliolefinas / Madera de haya", "Syndopal Vegetal RSPO / 1% Jacinthe 722", "Vegetal Estd.", "Yute", "Yute / Algodón", "Yute Natural Laminado / Canvas", "Yute laminado", "Yute laminado / PP / Algodón / Aluminio", "Yute no laminado" } },
+            { "Non Woven", new List<string> { "Non Woven / Algodón con laminado PET" } },
+            { "Nylon", new List<string> { "Nailon", "Nylon" } },
+            { "PU", new List<string> { "Fieltro RPET 2mm / PU", "PU / Aluminio reciclado / Cartón", "PU / PEVA", "PU / Papel", "PU / Plástico", "PU / RPET" } },
+            { "PVC", new List<string> { "PVC / Poliéster" } },
+            { "Papel", new List<string> { "Papel / Cartón", "Papel / Madera / plástico", "Papel / Poliéster" } },
+            { "Parafina", new List<string> { "Parafina / Lata" } },
+            { "Piel sintética", new List<string> { "Piel sintética" } },
+            { "Plástico", new List<string> { "600D PU Resistente al agua", "900D PU Resistente al agua", "ABS", "ABS / EVA", "ABS / PU", "ABS / PVC", "ABS Reciclado", "ABS reciclado", "AS", "Acrílico", "Acrílico 120 gr / EPE / PP / RPET 600D", "Cartón de bricks de leche", "Caucho", "EVA", "Esponja / PE", "Goma", "Goma EVA", "Neopreno", "Non Woven", "PETG", "PETG / PP", "POE / Poliéster", "PP", "PP / Fibra de Trigo / Silicona", "PP Laminado", "PP woven", "PU", "PU 210D", "PU 900D", "PU 900D Impermeable", "PU reciclado", "PVC", "PVC / ABS", "PVC / Plástico", "Plastico / Bambú", "Plástico", "Plástico / Acero Inoxidable", "Plástico / Acero Inoxidable 201", "Plástico / Cartón", "Plástico / Litio", "Plástico / Metal", "Plástico / Silicona", "Plástico Antibacteriano", "Plástico UV400", "Polietileno", "Polipropileno", "Polipropileno Enviromental (BOPP+VMPET)", "Poliresina", "Pongee RPET / Fibra de vidrio / EVA", "RPET", "RPET 210", "RPET 300D", "RPET 300D / PU", "RPET 600D", "RPET Poliéster", "Silicona", "Solución Hidroalcohólica: 75% alcohol / Tapa: PP / Tubo: PS", "TPE / NBR", "Tritan" } },
+            { "Polialgodón", new List<string> { "Polialgodón / Yute" } },
+            { "Polipropileno", new List<string> { "Polipropileno / Papel" } },
+            { "Poliéster", new List<string> { "30% Poliéster Reciclado 70% Poliéster", "300D Poliéster RPET", "300D Poliéster RPET / 900D PU Resistente al agua", "65% Poliéster RPET / 35% Algodón / PEVA", "80% Poliéster (RPET) / 20% Poliamida", "Banda: TPE / Bolsa: Poliéster RPET", "Bandas: TPE / Bolsa: Poliéster RPET", "Fieltro Poliéster RP / 2mm.", "Fieltro RPET", "Franela de Poliéster", "Funda: Poliéster / Algodón / Relleno: PVC", "Microfibra", "Microfibra RPET 67% / Poliéster 33%", "Non Woven RPET", "Non woven RPET", "Nonwoven RPET", "Pana de Poliéster", "Polar RPET / 600D RPET / PEVA", "Poliester / poliamida", "Poliuretano / Poliéster", "Poliéster", "Poliéster / Algodón", "Poliéster / Elastano", "Poliéster / Goma", "Poliéster / Metal", "Poliéster / Nailon", "Poliéster / Non Woven", "Poliéster / Nylon", "Poliéster / PU", "Poliéster / Pluma", "Poliéster / Poliamida", "Poliéster /Madera", "Poliéster 190T", "Poliéster 190T / Madera", "Poliéster 200D", "Poliéster 210D", "Poliéster 210D RPET", "Poliéster 280D", "Poliéster 300D", "Poliéster 300D / 50% RPET", "Poliéster 300D RPET", "Poliéster 420D 70% / RPET 30%", "Poliéster 50% / Algodón 50%", "Poliéster 500D", "Poliéster 600D", "Poliéster 600D  RPET / Cartón / Papel", "Poliéster 600D Two Tone", "Poliéster 600d / Acero", "Poliéster 80% / Poliamida 20%", "Poliéster Acolchado", "Poliéster Jeans", "Poliéster Polar", "Poliéster RPET", "Poliéster RPET / ABS", "Poliéster RPET / Metal / Cartón", "Poliéster RPET 1200D", "Poliéster RPET 1680D", "Poliéster RPET 190T", "Poliéster RPET 300D", "Poliéster RPET 500D / PU", "Poliéster RPET 600D", "Polycanvas", "Pongee RPET", "RPET / Panel trasero Poliéster 420D", "RPET 30% / Poliéster 70%", "RPET Two Tone", "Satén", "Terciopelo de Poliéster" } },
+            { "Pongee", new List<string> { "Pongee / Fibra de Vidrio", "Pongee / Fibra de vidrio", "Pongee 190T/Acero Galvanizado/ABS", "Pongee 190T/Acero Inoxidable/Fibra de Vidrio", "Pongee RPET / Metal / Fibra de Vidrio", "Pongee Rpet / Metal / Fibra De Vidrio" } },
+            { "RPET", new List<string> { "Plástico RPET / Acero Inoxidable", "RPET 300D / Bambú", "RPET 300D 48% / Nylon", "RPET 600D / Aluminio / PEVA", "RPET Nailon" } },
+            { "Silicona", new List<string> { "Silicona / Plastico / Metal" } },
+            { "Solución Hidroalcohólica", new List<string> { "Solución Hidroalcohólica: 75% alcohol" } },
+            { "Tejido", new List<string> { "Tejido Interlock / Esponja", "Tejido interlock / Esponja" } },
+            { "Terciopelo", new List<string> { "Terciopelo / Papel" } },
+            { "Textil", new List<string> { "Chiffon", "Rayón", "Terciopelo" } },
+            { "Tritan", new List<string> { "Tritan / Acero Inoxidávelidávelidable" } },
+            { "Vidrio", new List<string> { "Borosilicato / Bambú", "Corcho / Cristal", "Cristal", "Cristal / Acero Inoxidable", "Cristal / Acero Inoxidable / Neopreno", "Cristal / Cera", "Cristal / Madera / Silicona", "Cristal / Parafina", "Cristal Borosilicato / Acero Inoxidable", "Piedra / Vidrio / Aceite de fragancia / Caja de cartón", "Vidrio / Cera / Fragancia", "Vidrio / Madera", "Vidrio / Metal / Cera / Fragancia" } },
+            { "Viscosa", new List<string> { "Viscosa" } },
+        };
+
+    // Mapeo valor → familia
+    var valueToMaterialBase = new Dictionary<string, string>();
+    foreach (var attr in Model.Attributes.Where(a => a.Values.Any()))
+    {
+        foreach (var value in attr.Values)
+        {
+            if (string.IsNullOrEmpty(value.Name)) continue;
+            var matName = value.Name.Trim();
+            foreach (var grp in materialGroups)
+            {
+                if (grp.Value.Any(m => string.Equals(m, matName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    valueToMaterialBase[matName] = grp.Key;
+                    break;
+                }
+            }
+            if (!valueToMaterialBase.ContainsKey(matName))
+                valueToMaterialBase[matName] = matName;
+        }
+    }
+
+    // ID del atributo Material 
+    var materialAttrId = 68;
+
+    // ============================
+    // GRUPOS y COLORES VISIBLES
+    // ============================
+    var colorGroups = new Dictionary<string, List<string>> {
+        { "Rojo", new List<string> { "#671627", "#6D2B07", "#771F45", "#9D0000", "#9D2235", "#9E2A2F", "#A01A40", "#AB2328", "#AE415C", "#B56A6E", "#B77E7F", "#C73144", "#CC2227", "#CC5636", "#CE4C49", "#D35434", "#E10098", "#E26C6C", "#E30613", "#E40000", "#E46179", "#E49ABD", "#E74476", "#E75170", "#ED7A3B", "#EF3340", "#F54E53", "#FB0000", "#FE9285", "#FF0000", "#FF0022", "#FF4444", "#FF666E", "#FF8886" } },
+        { "Naranja", new List<string> { "#B94700", "#C84F06", "#E94E1B", "#ED7A3B", "#FE5000", "#FF6A13", "#FF7B0A", "#FFB536" } },
+        { "Amarillo", new List<string> { "#B89D18", "#C2A900", "#C79B42", "#D4AF37", "#D5A104", "#D7A314", "#EAA706", "#F4AE33", "#FBB515", "#FBD476", "#FFD700", "#FFDB00", "#FFED00" } },
+        { "Verde", new List<string> { "#008000", "#009444", "#009640", "#009900", "#0BC938", "#0C911C", "#154734", "#18D649", "#1D332A", "#1EAE17", "#243721", "#325649", "#379630", "#3AAA35", "#4A773C", "#4C6128", "#5B6135", "#63A390", "#719949", "#73C92D", "#78C33C", "#87AE48", "#95C11F", "#00FF00", "#96FF00", "#97D700", "#B6C832", "#C3D841" } },
+        { "Cyan", new List<string> { "#006274", "#006493", "#006F8D", "#007257", "#009FE3", "#00A19A", "#00AB84", "#00AEB4", "#00C493", "#1AA7D1", "#83C8E7", "#87CEE2", "#96BCDA", "#C1CFCA", "#C5D9E7", "#D6E3E8" } },
+        { "Azul", new List<string> { "#0000AA", "#0000FF", "#003E9B", "#0040DB", "#004284", "#0055A7", "#0060FF", "#0641EA", "#0612AB", "#0B4C92", "#10069F", "#112939", "#11479F", "#1B2A3C", "#1B306B", "#192EEF", "#213787", "#2200FF", "#2A84CC", "#2B293D", "#2B3D58", "#2E364D", "#333F48", "#385585", "#395668", "#3CA7FA", "#3D53CA", "#434A5F", "#440099", "#465C7F", "#46749A", "#485CC7", "#4B5664", "#4B665E", "#567CBB", "#586883" } },
+        { "Morado", new List<string> { "#381258", "#381286", "#4E008E", "#4F0F70", "#8C3EC8", "#990099", "#A94463", "#B098C4", "#B695C0", "#BB29BB", "#CF78AA", "#D6B2D0" } },
+        { "Rosa", new List<string> { "#E5C2CA", "#E6007E", "#EDDBEB", "#F172C6", "#FE7CDD", "#FF83B6", "#FFBF9F" } },
+        { "Vino", new List<string> { "#0F0F70", "#671627", "#6A2C36", "#A01A40", "#B56A6E" } },
+        { "Marron", new List<string> { "#2D2926", "#402020", "#4E3629", "#4F2832", "#4F2C1D", "#502C1E", "#54415E", "#5E2A2B", "#5E5145", "#683C11", "#6A2C36", "#6A3643", "#6B2830", "#744F28", "#776E64", "#776F48", "#77725A", "#78564C", "#786748", "#7A6E66", "#7B6A58", "#84754E", "#86754D", "#8C7732", "#936037", "#946037", "#956C58", "#997777", "#998677", "#9E9E7D", "#A17F4D", "#A35330", "#A89968", "#AC8F87", "#AD7C59", "#AE8A79", "#AFA9A0", "#B17F4A", "#B2A8A2", "#B78D5B", "#B78D6B", "#B9975B", "#BF9474", "#C09C83", "#C1B2B6", "#C2AF9E", "#C29E85", "#C2BDA3", "#C4BDA3", "#C4BFB6", "#C5A28E", "#C5B783", "#CBA052", "#CDBA78", "#CEA886", "#CEBC71", "#D3BBA8", "#D3BCA4", "#D3BC8D", "#D5A286", "#D5D3BF", "#D7C69E", "#D8BA9A", "#D9B48F", "#DDCBA4", "#DFD1A7", "#E1B87F", "#E2DAC6", "#E2DEE0", "#E3CA99", "#EFCFAC" } },
+        { "Natural", new List<string> { "#EFCEAC","#EDD5C4","#F1E6B2","#F7E7CE","#F8ECD7" } },
+        { "Negro", new List<string> { "#000000", "#1C1C1E", "#1C1F2A", "#1D1D1B", "#25282A", "#2C2C2C", "#393939", "#4C4C4C", "#54585A", "#56595B", "#575756", "#656565", "#666666", "#6D7276", "#727272", "#7A7A7A", "#857874", "#898989", "#8C857B", "#8E8F90", "#978C87", "#9D968D", "#9D9D9C", "#A2AAAD", "#A4A4A4", "#A8A99E", "#AAADAA", "#AAAAAA", "#ACACAC", "#B2B4B2", "#B2B5B7", "#B8B8B8", "#B9B7BD", "#BEBEBE", "#C1C6C8", "#C4BCB7", "#C7C9C7", "#D0D3D4", "#D3D3D3", "#DBDCDB" } },
+        { "Gris", new List<string> { "#000000", "#1c1c1e", "#1c1f2a", "#1d1d1b", "#25282a", "#2c2c2c", "#393939","#4c4c4c", "#54585a", "#56595b", "#575756", "#656565", "#666666", "#6d7276","#727272", "#7a7a7a", "#857874", "#898989", "#8c857b", "#8e8f90", "#978c87","#9d968d", "#9d9d9c", "#a2aaad", "#a4a4a4", "#a8a99e", "#aaadaa", "#aaaaaa","#acacac", "#b2b4b2", "#b2b5b7", "#b8b8b8", "#b9b7bd", "#bebebe", "#c1c6c8","#c4bcb7", "#c7c9c7", "#d0d3d4", "#d3d3d3", "#dbdcdb","#1C1C1E", "#1C1F2A", "#1D1D1B", "#25282A", "#2C2C2C", "#393939", "#4C4C4C", "#54585A", "#56595B", "#575756", "#656565", "#666666", "#6D7276", "#727272", "#7A7A7A", "#857874", "#898989", "#8C857B", "#8E8F90", "#978C87", "#9D968D", "#9D9D9C", "#A2AAAD", "#A4A4A4", "#A8A99E", "#AAADAA", "#AAAAAA", "#ACACAC", "#B2B4B2", "#B2B5B7", "#B8B8B8", "#B9B7BD", "#BEBEBE", "#C1C6C8", "#C4BCB7", "#C7C9C7", "#D0D3D4", "#D3D3D3", "#DBDCDB"} },
+        { "Blanco", new List<string> { "#DDDDDD", "#DFDBDA", "#E3E3E3", "#EBE5DA", "#EDEDED", "#EDD5C4", "#EEEEEE", "#EFEBE6", "#F1E6B2", "#F7E7CE", "#F8ECE4", "#F8ECD7", "#FCFCFC", "#FFFFFF", "#9D9D9C" } },
+};
+
+    var visibleColors = new Dictionary<string, string> {
+        { "Rojo", "#DF1313" },
+        { "Naranja", "#F06A27" },
+        { "Amarillo", "#F7EB11" },
+        { "Verde", "#3EB210" },
+        { "Cyan", "#2CBADE" },
+        { "Azul", "#2E21A9" },
+        { "Morado", "#7C21A9" },
+        { "Rosa", "#EE2EB8" },
+        { "Vino", "#951B31" },
+        { "Marron", "#976147" },
+        { "Natural", "#EFCEAC" },
+        { "Negro", "#1F1F1E" },
+        { "Gris", "#BEBEBE" },
+        { "Blanco", "#F2F7F0" },
+    };
+
+    var valueToColorBase = new Dictionary<int, string>();
+    foreach (var attr in Model.Attributes.Where(a => a.Values.Any(v => !string.IsNullOrEmpty(v.ColorSquaresRgb))))
+    {
+        foreach (var value in attr.Values)
+        {
+            if (!string.IsNullOrEmpty(value.ColorSquaresRgb))
+            {
+                var hex = value.ColorSquaresRgb.ToUpper();
+                foreach (var baseColor in colorGroups)
+                {
+                    if (baseColor.Value.Contains(hex))
+                    {
+                        valueToColorBase[value.Id] = baseColor.Key;
+                        break;
+                    }
+                }
+                if (!valueToColorBase.ContainsKey(value.Id))
+                    valueToColorBase[value.Id] = "Negro";
+            }
+        }
+    }
+
+    // ============================
+    // RANGOS DE CAPACIDAD
+    // ============================
+    var capacityRanges = new List<(string Name, double Min, double Max)> {
+        ("0 - 0.5 L", 0, 0.5),
+        ("0.5 - 1 L", 0.5, 1),
+        ("1 - 2 L", 1, 2),
+        ("2 - 5 L", 2, 5),
+        ("5 - 10 L", 5, 10),
+        ("10 - 15 L", 10, 15),
+        ("15 - 20 L", 15, 20),
+        ("20 L+", 20, double.MaxValue)
+    };
+
+    // ============================
+    // RANGOS DE GRAMAJE
+    // ============================
+    var gramajeRanges = new List<int> { 70, 80, 90, 100, 120, 160, 180, 200, 250 };
+    var valueToGramajeRange = new Dictionary<int, int>();
+    foreach (var attr in Model.Attributes.Where(a => a.Id == 5))
+    {
+        foreach (var value in attr.Values)
+        {
+            var raw = value.Name;
+            var digits = new string(raw.Where(c => char.IsDigit(c)).ToArray());
+            if (int.TryParse(digits, out var number))
+            {
+                var closest = gramajeRanges.OrderBy(r => Math.Abs(r - number)).FirstOrDefault();
+                valueToGramajeRange[value.Id] = closest;
+            }
+        }
+    }
+
+    var valueToCapacityRange = new Dictionary<int, string>();
+    foreach (var attr in Model.Attributes.Where(a => a.Id == 27))
+    {
+        foreach (var value in attr.Values)
+        {
+            double litros = 0;
+            var raw = value.Name.ToLower()
+                .Replace(" ", "")
+                .Replace(",", ".")
+                .Replace("ml", "")
+                .Replace("l", "");
+
+            if (value.Name.ToLower().Contains("ml"))
+            {
+                if (double.TryParse(raw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var ml))
+                    litros = ml / 1000.0;
+            }
+            else if (double.TryParse(raw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var l))
+            {
+                litros = l;
+            }
+
+            if (litros > 0)
+            {
+                foreach (var range in capacityRanges)
+                {
+                    if (litros >= range.Min && litros < range.Max)
+                    {
+                        valueToCapacityRange[value.Id] = range.Name;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+<div class="product-filter product-spec-filter widget widget-filter mb-4 pb-4">
+    <div class="mb-2 d-flex justify-content-between">
+        <h3 class="widget-title">@T("Filtering.SpecificationFilter")</h3>
+    </div>
+
+    <div class="filter-content collapse show" id="filterContent"><!-- show -->
+
+@{
+            var excludedAttributeIds = new[] { 67 };
+        }
+
+@* TEMPORAL - BORRAR DESPUÉS 
+@foreach (var attr in Model.Attributes)
+{
+    <div style="font-size:11px; color:red;">ID: @attr.Id — @attr.Name</div>
+}
+<div style="font-size:11px; color:blue;">
+    LangId: @ViewBag.CurrentLanguageId — 
+    WorkLang: @System.Threading.Thread.CurrentThread.CurrentUICulture.Name —
+    Url: @Context.Request.Path
+</div>*@
+
+        @foreach (var attr in Model.Attributes.Where(a => !excludedAttributeIds.Contains(a.Id)))
+        {
+            cont++;
+
+            // ==== FILTRO DE COLORES ====
+            if (attr.Values.Any(x => !string.IsNullOrEmpty(x.ColorSquaresRgb)))
+            {
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="widget-sub-title">Color</span>
+                    <a data-bs-toggle="collapse" href="#collapseColorFilter_@cont" aria-expanded="true" aria-controls="collapseColorFilter_@cont" class="widget-collapse">
+                        <i class="bi bi-list"></i>
+                    </a>
+                </div>
+                <div class="collapse show" id="collapseColorFilter_@cont">
+                    <ul class="list-unstyled d-flex flex-wrap color-base-list">
+                        @foreach (var baseColor in colorGroups.Keys)
+                        {
+                            var circleHex = visibleColors.ContainsKey(baseColor)
+                                ? visibleColors[baseColor]
+                                : colorGroups[baseColor].First();
+                            <li class="me-2 mb-2">
+                                <input type="checkbox"
+                                       class="form-check-input d-none base-color-checkbox"
+                                       id="base-color-@baseColor-@cont"
+                                       data-color-base="@baseColor" />
+                                <label for="base-color-@baseColor-@cont"
+                                       class="color-circle"
+                                       title="@baseColor"
+                                       style="background-color: @circleHex;"></label>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            // ==== FILTRO DE MATERIAL ====
+            else if (attr.Id == materialAttrId)
+            {
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="widget-sub-title">@attr.Name</span>
+                    <a data-bs-toggle="collapse" href="#collapseMaterialFilter_@cont" aria-expanded="true" aria-controls="collapseMaterialFilter_@cont" class="widget-collapse">
+                        <i class="bi bi-list"></i>
+                    </a>
+                </div>
+                <div class="collapse show" id="collapseMaterialFilter_@cont">
+                    <ul class="list-unstyled widget-list widget-filter-list pt-1" style="max-height: 11rem;" data-simplebar data-simplebar-auto-hide="false">
+                        @foreach (var familia in materialGroups.Keys)
+                        {
+                            <li class="item widget-filter-item mb-1 me-3">
+                                <div class="form-check">
+                                    <input id="material-@familia-@cont"
+                                           class="form-check-input material-family-checkbox"
+                                           type="checkbox"
+                                           data-material-family="@familia" />
+                                    <label class="form-check-label widget-filter-item-text text-accent" for="material-@familia-@cont">
+                                        @familia
+                                    </label>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            // ==== FILTRO DE CAPACIDAD ====
+            else if (attr.Id == 27)
+            {
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="widget-sub-title">@attr.Name</span>
+                    <a data-bs-toggle="collapse" href="#collapseCapacityFilter_@cont" aria-expanded="true" aria-controls="collapseCapacityFilter_@cont" class="widget-collapse">
+                        <i class="bi bi-list"></i>
+                    </a>
+                </div>
+                <div class="collapse show" id="collapseCapacityFilter_@cont">
+                    <ul class="list-unstyled widget-list widget-filter-list pt-1">
+                        @foreach (var range in capacityRanges)
+                        {
+                            var safeId = range.Name.Replace(" ", "").Replace("‐", "").Replace("+", "Plus").Replace(".", "");
+                            <li class="item widget-filter-item mb-1 me-3">
+                                <div class="form-check">
+                                    <input id="capacity-@safeId-@cont"
+                                           class="form-check-input capacity-range-checkbox"
+                                           type="checkbox"
+                                           data-capacity-range="@range.Name" />
+                                    <label class="form-check-label text-accent" for="capacity-@safeId-@cont">
+                                        @range.Name
+                                    </label>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            // ==== FILTRO DE GRAMAJE ====
+            else if (attr.Id == 5)
+            {
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="widget-sub-title">@attr.Name</span>
+                    <a data-bs-toggle="collapse" href="#collapseGramajeFilter_@cont" aria-expanded="true" aria-controls="collapseGramajeFilter_@cont" class="widget-collapse">
+                        <i class="bi bi-list"></i>
+                    </a>
+                </div>
+                <div class="collapse show" id="collapseGramajeFilter_@cont">
+                    <ul class="list-unstyled widget-list widget-filter-list pt-1">
+                        @foreach (var g in gramajeRanges)
+                        {
+                            <li class="item widget-filter-item mb-1 me-3">
+                                <div class="form-check">
+                                    <input id="gramaje-@g-@cont"
+                                           class="form-check-input gramaje-range-checkbox"
+                                           type="checkbox"
+                                           data-gramaje-range="@g" />
+                                    <label class="form-check-label text-accent" for="gramaje-@g-@cont">
+                                        @($"{g} g/m²")
+                                    </label>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            // ==== OTROS FILTROS ====
+            else
+            {
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="widget-sub-title">@attr.Name</span>
+                    <a data-bs-toggle="collapse" href="#collapseExample_@cont" aria-expanded="true" aria-controls="collapseExample_@cont" class="widget-collapse">
+                        <i class="bi bi-list"></i>
+                    </a>
+                </div>
+                <div class="collapse show" id="collapseExample_@cont">
+                    <ul class="group product-spec-group widget-list widget-filter-list list-unstyled pt-1" style="max-height: 11rem;" data-simplebar data-simplebar-auto-hide="false">
+                        @foreach (var value in attr.Values)
+                        {
+                            <li class="item widget-filter-item mb-1 me-3">
+                                <div class="form-check">
+                                    <input id="attr-visible-@value.Id"
+                                           data-option-id="@value.Id"
+                                           class="form-check-input visible-attribute-input"
+                                           type="checkbox"
+                                           checked="@value.Selected">
+                                    <label class="form-check-label widget-filter-item-text text-accent" for="attr-visible-@value.Id">
+                                        @value.Name
+                                    </label>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+
+        <!-- CHECKBOXES REALES OCULTOS -->
+        <div class="d-none" id="real-attribute-filters">
+            @foreach (var attr in Model.Attributes)
+            {
+                foreach (var value in attr.Values)
+                {
+                    var matFamily = valueToMaterialBase.ContainsKey(value.Name?.Trim() ?? "")
+                        ? valueToMaterialBase[value.Name.Trim()]
+                        : "";
+                    <input id="real-attr-@value.Id"
+                            data-option-id="@value.Id"
+                            data-color-base="@(valueToColorBase.ContainsKey(value.Id) ? valueToColorBase[value.Id] : "")"
+                            data-material-family="@matFamily"
+                            data-capacity-range="@(valueToCapacityRange.ContainsKey(value.Id) ? valueToCapacityRange[value.Id] : "")"
+                            data-gramaje-range="@(valueToGramajeRange.ContainsKey(value.Id) ? valueToGramajeRange[value.Id] : "")"
+                            class="form-check-input real-attribute-input"
+                            type="checkbox"
+                            checked="@value.Selected" />
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<script asp-location="Footer">
+$(document).ready(function () {
+    var $realOptions = $('.real-attribute-input');
+    var $baseColorCheckboxes = $('.base-color-checkbox');
+    var $capacityCheckboxes = $('.capacity-range-checkbox');
+    var $visibleAttributes = $('.visible-attribute-input');
+    var $materialCheckboxes = $('.material-family-checkbox');
+
+    const colorGroups = {
+        "Rojo": ["#671627","#6D2B07","#771F45","#9D0000","#9D2235","#9E2A2F","#A01A40","#AB2328","#AE415C","#B56A6E","#B77E7F","#C73144","#CC2227","#CC5636","#CE4C49","#D35434","#E10098","#E26C6C","#E30613","#E40000","#E46179","#E49ABD","#E74476","#E75170","#ED7A3B","#EF3340","#F54E53","#FB0000","#FE9285","#FF0000","#FF0022","#FF4444","#FF666E","#FF8886"],
+        "Naranja": ["#B94700","#C84F06","#E94E1B","#ED7A3B","#FE5000","#FF6A13","#FF7B0A","#FFB536"],
+        "Amarillo": ["#B89D18","#C2A900","#C79B42","#D4AF37","#D5A104","#D7A314","#EAA706","#F4AE33","#FBB515","#FBD476","#FFD700","#FFDB00","#FFED00"],
+        "Verde": ["#008000","#009444","#009640","#009900","#0BC938","#0C911C","#154734","#18D649","#1D332A","#1EAE17","#243721","#325649","#379630","#3AAA35","#4A773C","#4C6128","#5B6135","#63A390","#719949","#73C92D","#78C33C","#87AE48","#95C11F","#00FF00","#96FF00","#97D700","#B6C832","#C3D841"],
+        "Cyan": ["#006274","#006493","#006F8D","#007257","#009FE3","#00A19A","#00AB84","#00AEB4","#00C493","#1AA7D1","#83C8E7","#87CEE2","#96BCDA","#C1CFCA","#C5D9E7","#D6E3E8"],
+        "Azul": ["#0000AA","#0000FF","#003E9B","#0040DB","#004284","#0055A7","#0060FF","#0641EA","#0612AB","#0B4C92","#10069F","#112939","#11479F","#1B2A3C","#1B306B","#192EEF","#213787","#2200FF","#2A84CC","#2B293D","#2B3D58","#2E364D","#333F48","#385585","#395668","#3CA7FA","#3D53CA","#434A5F","#440099","#465C7F","#46749A","#485CC7","#4B5664","#4B665E","#567CBB","#586883"],
+        "Morado": ["#381258","#381286","#4E008E","#4F0F70","#8C3EC8","#990099","#A94463","#B098C4","#B695C0","#BB29BB","#CF78AA","#D6B2D0"],
+        "Rosa": ["#E5C2CA","#E6007E","#EDDBEB","#F172C6","#FE7CDD","#FF83B6","#FFBF9F"],
+        "Vino": ["#0F0F70","#671627","#6A2C36","#A01A40","#B56A6E"],
+        "Marron": ["#2D2926","#402020","#4E3629","#4F2832","#4F2C1D","#502C1E","#54415E","#5E2A2B","#5E5145","#683C11","#6A2C36","#6A3643","#6B2830","#744F28","#776E64","#776F48","#77725A","#78564C","#786748","#7A6E66","#7B6A58","#84754E","#86754D","#8C7732","#936037","#946037","#956C58","#997777","#998677","#9E9E7D","#A17F4D","#A35330","#A89968","#AC8F87","#AD7C59","#AE8A79","#AFA9A0","#B17F4A","#B2A8A2","#B78D5B","#B78D6B","#B9975B","#BF9474","#C09C83","#C1B2B6","#C2AF9E","#C29E85","#C2BDA3","#C4BDA3","#C4BFB6","#C5A28E","#C5B783","#CBA052","#CDBA78","#CEA886","#CEBC71","#D3BBA8","#D3BCA4","#D3BC8D","#D5A286","#D5D3BF","#D7C69E","#D8BA9A","#D9B48F","#DDCBA4","#DFD1A7","#E1B87F","#E2DAC6","#E2DEE0","#E3CA99","#EFCFAC"],
+        "Negro": ["#000000","#1C1C1E","#1C1F2A","#1D1D1B","#25282A","#2C2C2C","#393939","#4C4C4C","#54585A","#56595B","#575756","#656565","#666666","#6D7276","#727272","#7A7A7A","#857874","#898989","#8C857B","#8E8F90","#978C87","#9D968D","#9D9D9C","#A2AAAD","#A4A4A4","#A8A99E","#AAADAA","#AAAAAA","#ACACAC","#B2B4B2","#B2B5B7","#B8B8B8","#B9B7BD","#BEBEBE","#C1C6C8","#C4BCB7","#C7C9C7","#D0D3D4","#D3D3D3","#DBDCDB"],
+        "Blanco": ["#DDDDDD","#DFDBDA","#E3E3E3","#EBE5DA","#EDEDED","#EDD5C4","#EEEEEE","#EFEBE6","#F1E6B2","#F7E7CE","#F8ECE4","#F8ECD7","#FCFCFC","#FFFFFF"]
+    };
+
+    function rgbToHex(rgb) {
+        if (rgb.startsWith("#")) return rgb.toUpperCase();
+        const result = rgb.match(/\d+/g);
+        if (!result || result.length < 3) return "";
+        return "#" + result.slice(0, 3).map(x => ("0" + parseInt(x).toString(16)).slice(-2).toUpperCase()).join("");
+    }
+
+    function aplicarColorAProductos(coloresSeleccionados) {
+        if (coloresSeleccionados.length === 0) return;
+        let hexesBuscados = [];
+        coloresSeleccionados.forEach(colorBase => {
+            if (colorGroups[colorBase]) hexesBuscados = hexesBuscados.concat(colorGroups[colorBase]);
+        });
+        if (hexesBuscados.length === 0) return;
+        setTimeout(() => {
+            document.querySelectorAll(".product-item").forEach(producto => {
+                const topos = producto.querySelectorAll(".variant-preview");
+                for (let topo of topos) {
+                    const bg = window.getComputedStyle(topo).backgroundColor;
+                    if (!bg) continue;
+                    const hex = rgbToHex(bg);
+                    if (hexesBuscados.includes(hex)) { topo.click(); break; }
+                }
+            });
+        }, 300);
+    }
+
+    $visibleAttributes.on('change', function () {
+        var optionId = $(this).data('option-id');
+        $realOptions.filter('[data-option-id="' + optionId + '"]').prop('checked', $(this).is(':checked'));
+        CatalogProducts.getProducts();
+    });
+
+    $baseColorCheckboxes.on('change', function () {
+        var colorBase = $(this).data('color-base');
+        $realOptions.filter('[data-color-base="' + colorBase + '"]').prop('checked', $(this).is(':checked'));
+        CatalogProducts.getProducts();
+        var coloresSeleccionados = [];
+        $baseColorCheckboxes.filter(':checked').each(function() { coloresSeleccionados.push($(this).data('color-base')); });
+        aplicarColorAProductos(coloresSeleccionados);
+    });
+
+    $materialCheckboxes.on('change', function () {
+        var family = $(this).data('material-family');
+        var isChecked = $(this).is(':checked');
+        $realOptions.filter('[data-material-family="' + family + '"]').prop('checked', isChecked);
+        CatalogProducts.getProducts();
+    });
+
+    $capacityCheckboxes.on('change', function () {
+        var range = $(this).data('capacity-range');
+        $realOptions.filter('[data-capacity-range="' + range + '"]').prop('checked', $(this).is(':checked'));
+        CatalogProducts.getProducts();
+    });
+
+    var $gramajeCheckboxes = $('.gramaje-range-checkbox');
+    $gramajeCheckboxes.on('change', function () {
+        var g = $(this).data('gramaje-range');
+        $realOptions.filter('[data-gramaje-range="' + g + '"]').prop('checked', $(this).is(':checked'));
+        CatalogProducts.getProducts();
+    });
+
+    $realOptions.on('change', function () { CatalogProducts.getProducts(); });
+
+    $(CatalogProducts).on('loaded', function() {
+        var coloresSeleccionados = [];
+        $baseColorCheckboxes.filter(':checked').each(function() { coloresSeleccionados.push($(this).data('color-base')); });
+        if (coloresSeleccionados.length > 0) aplicarColorAProductos(coloresSeleccionados);
+    });
+
+    $(CatalogProducts).on('before', function (e) {
+        var selectedOptions = [];
+        $realOptions.each(function() {
+            if ($(this).is(':checked')) selectedOptions.push($(this).data('option-id'));
+        });
+        if (selectedOptions.length > 0) e.payload.urlBuilder.addParameter('specs', selectedOptions.join(','));
+    });
+});
+</script>
+
+<style>
+    .color-circle {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .color-circle:hover {
+        transform: scale(1.1);
+        border-color: #999;
+    }
+    .base-color-checkbox:checked + .color-circle {
+        box-shadow: 0 0 0 1px #fff, 0 0 0 2px #999;
+    }
+</style>
